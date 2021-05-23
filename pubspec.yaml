@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  xterm: ^2.0.0
+  pty: ^0.1.1
 
 dev_dependencies:
   flutter_test:
