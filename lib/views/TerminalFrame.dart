@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pty/pty.dart';
 import 'package:xterm/flutter.dart';
-import 'package:xterm/frontend/input_behavior_desktop.dart';
-import 'package:xterm/mouse/mouse_mode.dart';
 import 'package:xterm/xterm.dart';
 
 class TerminalFrame extends StatefulWidget {
@@ -17,16 +15,24 @@ class TerminalFrame extends StatefulWidget {
 class TerminalFrameState extends State<TerminalFrame> {
 
   late Terminal _terminal;
-  PseudoTerminal _pty = PseudoTerminal.start('cmd', ['-1'], environment: {'TERM': 'xterm-256color'},);
+  late PseudoTerminal _console;
 
   @override
   void initState() {
+    _console = PseudoTerminal.start(
+      r'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe',
+      ['-l'],
+      environment: {'TERM': 'xterm-256color'},
+    );
     _terminal = Terminal(
-        onInput: _pty.write,
+        onInput: _console.write,
         platform: PlatformBehaviors.windows
     );
+    _terminal.debug.enable();
     _terminal.setBlinkingCursor(true);
-    _pty.out.listen(_terminal.write);
+    _console.out.listen((event) {
+      _terminal.write(event);
+    });
     super.initState();
   }
 
@@ -43,7 +49,7 @@ class TerminalFrameState extends State<TerminalFrame> {
             child: Row(
             children: [
               MaterialButton(onPressed: () {
-                _pty.write("echo hi");
+                _console.write("echo hi");
               }, child: Text("PRESS ME"),)
             ],
           )),
@@ -51,7 +57,7 @@ class TerminalFrameState extends State<TerminalFrame> {
       body: CupertinoScrollbar(
         child: TerminalView(
           terminal: _terminal,
-          onResize: _pty.resize,
+          onResize: _console.resize,
         ),
       ),
     );
