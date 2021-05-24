@@ -20,18 +20,24 @@ class TerminalFrameState extends State<TerminalFrame> {
   @override
   void initState() {
     _console = PseudoTerminal.start(
-      r'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe',
+      r'cmd',
       ['-l'],
       environment: {'TERM': 'xterm-256color'},
     );
     _terminal = Terminal(
-        onInput: _console.write,
+        onInput: (msg) {
+          _console.write(msg);
+          _terminal.write(msg);
+          print(msg);
+        },
+        maxLines: 10000,
         platform: PlatformBehaviors.windows
     );
-    _terminal.debug.enable();
+    //_terminal.debug.enable();
     _terminal.setBlinkingCursor(true);
     _console.out.listen((event) {
-      _terminal.write(event);
+      _console.write("echo hi");
+      print(event);
     });
     super.initState();
   }
