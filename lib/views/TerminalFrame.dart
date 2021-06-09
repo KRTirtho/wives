@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pty/pty.dart';
+import 'package:terminal/FrameBackend.dart';
 import 'package:xterm/flutter.dart';
 import 'package:xterm/xterm.dart';
 
@@ -9,37 +9,21 @@ class TerminalFrame extends StatefulWidget {
   State<StatefulWidget> createState() {
     return TerminalFrameState();
   }
-
 }
 
 class TerminalFrameState extends State<TerminalFrame> {
 
   late Terminal _terminal;
-  late PseudoTerminal _console;
 
   @override
   void initState() {
-    _console = PseudoTerminal.start(
-      r'cmd',
-      ['-l'],
-      environment: {'TERM': 'xterm-256color'},
-    );
+    super.initState();
     _terminal = Terminal(
-        onInput: (msg) {
-          _console.write(msg);
-          _terminal.write(msg);
-          print(msg);
-        },
         maxLines: 10000,
-        platform: PlatformBehaviors.windows
+        backend: FrameBackend(),
     );
     //_terminal.debug.enable();
     _terminal.setBlinkingCursor(true);
-    _console.out.listen((event) {
-      _console.write("echo hi");
-      print(event);
-    });
-    super.initState();
   }
 
   @override
@@ -54,16 +38,13 @@ class TerminalFrameState extends State<TerminalFrame> {
             Size.fromHeight(55.0),
             child: Row(
             children: [
-              MaterialButton(onPressed: () {
-                _console.write("echo hi");
-              }, child: Text("PRESS ME"),)
+
             ],
           )),
         )),
-      body: CupertinoScrollbar(
+      body: SafeArea(
         child: TerminalView(
           terminal: _terminal,
-          onResize: _console.resize,
         ),
       ),
     );
