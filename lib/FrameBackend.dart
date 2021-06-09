@@ -19,7 +19,6 @@ class FrameBackend implements TerminalBackend {
 
   @override
   void init() {
-    _outStream.sink.add("Starting pseudo terminal...");
     _pseudoTerminal = PseudoTerminal.start(
       r'cmd',
       ['-l'],
@@ -28,7 +27,6 @@ class FrameBackend implements TerminalBackend {
     _pseudoTerminal.out.listen((event) {
       _outStream.sink.add(event);
     });
-    _outStream.sink.add("Started pseudo terminal...");
   }
 
   @override
