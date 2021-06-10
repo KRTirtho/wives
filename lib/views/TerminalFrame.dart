@@ -14,6 +14,7 @@ class TerminalFrame extends StatefulWidget {
 class TerminalFrameState extends State<TerminalFrame> {
 
   late Terminal _terminal;
+  ScrollController _controller = ScrollController();
 
   @override
   void initState() {
@@ -46,7 +47,9 @@ class TerminalFrameState extends State<TerminalFrame> {
         child: Scrollbar(
           child: TerminalView(
             terminal: _terminal,
+            scrollController: _controller,
           ),
+          controller: _controller,
         ),
       ),
     );

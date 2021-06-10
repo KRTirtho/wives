@@ -7,11 +7,15 @@ import 'package:xterm/terminal/terminal_backend.dart';
 class FrameBackend implements TerminalBackend {
 
   StreamController<String> _outStream = StreamController<String>();
-  late PseudoTerminal _pseudoTerminal;
+  PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
+    r'cmd',
+    ['-l'],
+    environment: {'TERM': 'xterm-256color'},
+  );
 
   @override
   void ackProcessed() {
-    // TODO: implement ackProcessed
+    // TODO:
   }
 
   @override
@@ -19,11 +23,6 @@ class FrameBackend implements TerminalBackend {
 
   @override
   void init() {
-    _pseudoTerminal = PseudoTerminal.start(
-      r'cmd',
-      ['-l'],
-      environment: {'TERM': 'xterm-256color'},
-    );
     _pseudoTerminal.out.listen((event) {
       _outStream.sink.add(event);
     });
@@ -44,21 +43,20 @@ class FrameBackend implements TerminalBackend {
 
   @override
   void write(String input) {
-    _pseudoTerminal.write(input);
-
-
     if (input.length <= 0) {
       return;
     }
 
     if (input == '\r') {
       _outStream.sink.add('\r\n');
-      _outStream.sink.add('\$ ');
+      _pseudoTerminal.write('\n');
     } else if (input.codeUnitAt(0) == 127) {
       // Backspace handling
       _outStream.sink.add('\b \b');
+      _pseudoTerminal.write('\b \b');
     } else {
       _outStream.sink.add(input);
+      _pseudoTerminal.write(input);
     }
   }
 
