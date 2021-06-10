@@ -45,6 +45,21 @@ class FrameBackend implements TerminalBackend {
   @override
   void write(String input) {
     _pseudoTerminal.write(input);
+
+
+    if (input.length <= 0) {
+      return;
+    }
+
+    if (input == '\r') {
+      _outStream.sink.add('\r\n');
+      _outStream.sink.add('\$ ');
+    } else if (input.codeUnitAt(0) == 127) {
+      // Backspace handling
+      _outStream.sink.add('\b \b');
+    } else {
+      _outStream.sink.add(input);
+    }
   }
 
 }

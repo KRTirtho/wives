@@ -43,8 +43,10 @@ class TerminalFrameState extends State<TerminalFrame> {
           )),
         )),
       body: SafeArea(
-        child: TerminalView(
-          terminal: _terminal,
+        child: Scrollbar(
+          child: TerminalView(
+            terminal: _terminal,
+          ),
         ),
       ),
     );
