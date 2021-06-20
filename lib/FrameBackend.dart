@@ -16,6 +16,7 @@ class FrameBackend implements TerminalBackend {
   @override
   void ackProcessed() {
     // TODO:
+    //_pseudoTerminal.ackProcessed();
   }
 
   @override
@@ -32,7 +33,7 @@ class FrameBackend implements TerminalBackend {
   Stream<String> get out => _outStream.stream;
 
   @override
-  void resize(int width, int height) {
+  void resize(int width, int height, int pixelWidth, int pixelHeight) {
     _pseudoTerminal.resize(width, height);
   }
 
@@ -49,7 +50,7 @@ class FrameBackend implements TerminalBackend {
 
     if (input == '\r') {
       _outStream.sink.add('\r\n');
-      _pseudoTerminal.write('\n');
+      _pseudoTerminal.write('\r');
     } else if (input.codeUnitAt(0) == 127) {
       // Backspace handling
       _outStream.sink.add('\b \b');
