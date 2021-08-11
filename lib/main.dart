@@ -19,7 +19,6 @@ void main() {
 }
 
 class TerminalApp extends StatelessWidget {
-
   // Possible multi-theme switching later on.
   static ThemeData darkMode = new ThemeData(
     brightness: Brightness.dark,
@@ -44,4 +43,3 @@ class TerminalApp extends StatelessWidget {
     );
   }
 }
-

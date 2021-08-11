@@ -5,18 +5,16 @@ import 'package:pty/pty.dart';
 import 'package:xterm/terminal/terminal_backend.dart';
 
 class FrameBackend implements TerminalBackend {
-
   StreamController<String> _outStream = StreamController<String>();
   PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
-    r'cmd',
+    r'bash',
     ['-l'],
     environment: {'TERM': 'xterm-256color'},
   );
 
   @override
   void ackProcessed() {
-    // TODO:
-    //_pseudoTerminal.ackProcessed();
+    // TODO: Wait for pty to catch up.
   }
 
   @override
@@ -40,6 +38,7 @@ class FrameBackend implements TerminalBackend {
   @override
   void terminate() {
     _pseudoTerminal.kill(ProcessSignal.sigkill);
+    _outStream.close();
   }
 
   @override
@@ -49,16 +48,15 @@ class FrameBackend implements TerminalBackend {
     }
 
     if (input == '\r') {
-      _outStream.sink.add('\r\n');
+      //_outStream.sink.add('\r\n');
       _pseudoTerminal.write('\r');
     } else if (input.codeUnitAt(0) == 127) {
       // Backspace handling
-      _outStream.sink.add('\b \b');
+      //_outStream.sink.add('\b \b');
       _pseudoTerminal.write('\b \b');
     } else {
-      _outStream.sink.add(input);
+      //_outStream.sink.add(input);
       _pseudoTerminal.write(input);
     }
   }
-
 }

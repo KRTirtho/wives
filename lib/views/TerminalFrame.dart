@@ -12,7 +12,6 @@ class TerminalFrame extends StatefulWidget {
 }
 
 class TerminalFrameState extends State<TerminalFrame> {
-
   late Terminal _terminal;
   ScrollController _controller = ScrollController();
 
@@ -20,8 +19,8 @@ class TerminalFrameState extends State<TerminalFrame> {
   void initState() {
     super.initState();
     _terminal = Terminal(
-        maxLines: 10000,
-        backend: FrameBackend(),
+      maxLines: 10000,
+      backend: FrameBackend(),
     );
     //_terminal.debug.enable();
     _terminal.setBlinkingCursor(true);
@@ -31,18 +30,15 @@ class TerminalFrameState extends State<TerminalFrame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(55.0),
-        child: AppBar(
-          elevation: 0.0,
-          bottom: PreferredSize(
-            preferredSize:
-            Size.fromHeight(55.0),
-            child: Row(
-            children: [
-
-            ],
+          preferredSize: Size.fromHeight(55.0),
+          child: AppBar(
+            elevation: 0.0,
+            bottom: PreferredSize(
+                preferredSize: Size.fromHeight(55.0),
+                child: Row(
+                  children: [],
+                )),
           )),
-        )),
       body: SafeArea(
         child: Scrollbar(
           child: TerminalView(
@@ -54,5 +50,4 @@ class TerminalFrameState extends State<TerminalFrame> {
       ),
     );
   }
-
 }
