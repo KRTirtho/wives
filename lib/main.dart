@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 
 import 'views/TerminalFrame.dart';
 
-void Terminal() {
-  runApp(TerminalApp());
+void main() {
+  runApp(Terminal());
 }
 
-class TerminalApp extends StatelessWidget {
+class Terminal extends StatelessWidget {
   // Possible multi-theme switching later on.
   static ThemeData darkMode = new ThemeData(
     brightness: Brightness.dark,
