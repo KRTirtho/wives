@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 
 import 'views/TerminalFrame.dart';
 
-void main() {
+void Terminal() {
   runApp(TerminalApp());
 }
 
