@@ -29,16 +29,19 @@ class TerminalFrameState extends State<TerminalFrame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: Size.fromHeight(55.0),
-          child: AppBar(
-            elevation: 0.0,
-            bottom: PreferredSize(
-                preferredSize: Size.fromHeight(55.0),
-                child: Row(
-                  children: [],
-                )),
-          )),
+      // TODO: Implement toolbar
+      //**
+      //  appBar: PreferredSize(
+      //    preferredSize: Size.fromHeight(55.0),
+      //    child: AppBar(
+      //      elevation: 0.0,
+      //      bottom: PreferredSize(
+      //          preferredSize: Size.fromHeight(55.0),
+      //          child: Row(
+      //            children: [],
+      //          )),
+      //    )),
+      // */
       body: SafeArea(
         child: Scrollbar(
           child: TerminalView(

@@ -49,7 +49,7 @@ packages:
       name: convert
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -201,9 +201,11 @@ packages:
   xterm:
     dependency: "direct main"
     description:
-      name: xterm
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: dfd907b2a9159b9ded814aaf3ba67f5c601c8121
+      url: "https://github.com/dahliaOS/xterm.git"
+    source: git
     version: "2.5.0-pre"
 sdks:
   dart: ">=2.13.0 <3.0.0"

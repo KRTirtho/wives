@@ -24,7 +24,7 @@ class TerminalApp extends StatelessWidget {
     brightness: Brightness.dark,
     primarySwatch: Colors.deepOrange,
     primaryColor: const Color(0xFF212121),
-    accentColor: const Color(0xFFff6507),
+    accentColor: const Color(0xFFff6507), // TODO:
     canvasColor: const Color(0xFF303030),
     platform: TargetPlatform.fuchsia,
   );

@@ -2,7 +2,7 @@ name: terminal
 description: The default xterm for dahliaOS
 
 publish_to: 'none'
-version: 2.0.0+1
+version: 2.0.0+2
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -11,7 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  xterm: ^2.5.0-pre
+  xterm:
+    git: https://github.com/dahliaOS/xterm.git
   pty: ^0.1.1
 
 dev_dependencies:
