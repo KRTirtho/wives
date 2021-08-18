@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:terminal/FrameBackend.dart';
@@ -24,24 +26,22 @@ class TerminalFrameState extends State<TerminalFrame> {
     );
     //_terminal.debug.enable();
     _terminal.setBlinkingCursor(true);
+    _terminal.backend?.exitCode.then((value) => {exit(value)});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // TODO: Implement toolbar
-      //**
-      //  appBar: PreferredSize(
-      //    preferredSize: Size.fromHeight(55.0),
-      //    child: AppBar(
-      //      elevation: 0.0,
-      //      bottom: PreferredSize(
-      //          preferredSize: Size.fromHeight(55.0),
-      //          child: Row(
-      //            children: [],
-      //          )),
-      //    )),
-      // */
+      //appBar: PreferredSize(
+      //  preferredSize: Size.fromHeight(55.0),
+      //  child: AppBar(
+      //    elevation: 0.0,
+      //    bottom: PreferredSize(
+      //      preferredSize: Size.fromHeight(55.0),
+      //      child: Row(
+      //        children: [],
+      //      )),
+      //  )),
       body: SafeArea(
         child: Scrollbar(
           child: TerminalView(

@@ -11,6 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import 'package:flutter/material.dart';
+import 'package:window_size/window_size.dart';
 
 import 'views/TerminalFrame.dart';
 
@@ -31,6 +32,7 @@ class Terminal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    setWindowTitle("Terminal");
     return MaterialApp(
       title: 'Terminal',
       theme: darkMode,

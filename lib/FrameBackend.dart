@@ -8,7 +8,7 @@ class FrameBackend implements TerminalBackend {
   StreamController<String> _outStream = StreamController<String>();
   PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
     r'bash',
-    ['-l'],
+    ['-i'],
     environment: {'TERM': 'xterm-256color'},
   );
 

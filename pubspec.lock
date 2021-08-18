@@ -198,14 +198,21 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
+  window_size:
+    dependency: "direct main"
+    description:
+      path: "plugins/window_size"
+      ref: e48abe7c3e9ebfe0b81622167c5201d4e783bb81
+      resolved-ref: e48abe7c3e9ebfe0b81622167c5201d4e783bb81
+      url: "git://github.com/google/flutter-desktop-embedding.git"
+    source: git
+    version: "0.1.0"
   xterm:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: dfd907b2a9159b9ded814aaf3ba67f5c601c8121
-      url: "https://github.com/dahliaOS/xterm.git"
-    source: git
+      name: xterm
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "2.5.0-pre"
 sdks:
   dart: ">=2.13.0 <3.0.0"
