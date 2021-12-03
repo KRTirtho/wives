@@ -16,12 +16,12 @@ import 'package:window_size/window_size.dart';
 import 'views/TerminalFrame.dart';
 
 void main() {
-  runApp(Terminal());
+  runApp(const Terminal());
 }
 
 class Terminal extends StatelessWidget {
   // Possible multi-theme switching later on.
-  static ThemeData darkMode = new ThemeData(
+  static ThemeData darkMode = ThemeData(
     brightness: Brightness.dark,
     primarySwatch: Colors.deepOrange,
     primaryColor: const Color(0xFF212121),
@@ -29,6 +29,8 @@ class Terminal extends StatelessWidget {
     canvasColor: const Color(0xFF303030),
     platform: TargetPlatform.fuchsia,
   );
+
+  const Terminal({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
