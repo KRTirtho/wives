@@ -5,8 +5,8 @@ import 'package:pty/pty.dart';
 import 'package:xterm/terminal/terminal_backend.dart';
 
 class FrameBackend implements TerminalBackend {
-  StreamController<String> _outStream = StreamController<String>();
-  PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
+  final StreamController<String> _outStream = StreamController<String>();
+  final PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
     r'zsh',
     ['-i'],
     environment: {'TERM': 'xterm-256color'},
@@ -43,7 +43,7 @@ class FrameBackend implements TerminalBackend {
 
   @override
   void write(String input) {
-    if (input.length <= 0) {
+    if (input.isEmpty) {
       return;
     }
 

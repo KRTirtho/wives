@@ -40,7 +40,7 @@ class Terminal extends StatelessWidget {
       theme: darkMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => TerminalFrame(),
+        '/': (context) => const TerminalFrame(),
         // TODO: Implement Settings
         // '/settings': (context) => SettingsFrame(),
       },

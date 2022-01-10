@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:terminal/FrameBackend.dart';
 import 'package:xterm/flutter.dart';
 import 'package:xterm/xterm.dart';
 
 class TerminalFrame extends StatefulWidget {
+  const TerminalFrame({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return TerminalFrameState();
@@ -15,7 +16,7 @@ class TerminalFrame extends StatefulWidget {
 
 class TerminalFrameState extends State<TerminalFrame> {
   late Terminal _terminal;
-  ScrollController _controller = ScrollController();
+  final ScrollController _controller = ScrollController();
 
   @override
   void initState() {
