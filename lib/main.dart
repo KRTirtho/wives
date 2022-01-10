@@ -10,10 +10,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:terminal/views/terminal_view.dart';
 import 'package:window_size/window_size.dart';
-
-import 'views/TerminalFrame.dart';
 
 void main() {
   runApp(const Terminal());
@@ -23,11 +22,6 @@ class Terminal extends StatelessWidget {
   // Possible multi-theme switching later on.
   static ThemeData darkMode = ThemeData(
     brightness: Brightness.dark,
-    primarySwatch: Colors.deepOrange,
-    primaryColor: const Color(0xFF212121),
-    accentColor: const Color(0xFFff6507), // TODO:
-    canvasColor: const Color(0xFF303030),
-    platform: TargetPlatform.fuchsia,
   );
 
   const Terminal({Key? key}) : super(key: key);
@@ -35,12 +29,11 @@ class Terminal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     setWindowTitle("Terminal");
-    return MaterialApp(
+    return FluentApp(
       title: 'Terminal',
-      theme: darkMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => const TerminalFrame(),
+        '/': (context) => const TheTerminalView(),
         // TODO: Implement Settings
         // '/settings': (context) => SettingsFrame(),
       },

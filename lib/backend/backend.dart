@@ -1,28 +1,27 @@
-import 'dart:async';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:pty/pty.dart';
-import 'package:xterm/terminal/terminal_backend.dart';
+import 'package:xterm/xterm.dart';
 
-class FrameBackend implements TerminalBackend {
+class TerminalBackendX implements TerminalBackend {
   final StreamController<String> _outStream = StreamController<String>();
-  final PseudoTerminal _pseudoTerminal = PseudoTerminal.start(
-    r'zsh',
-    ['-i'],
-    environment: {'TERM': 'xterm-256color'},
-  );
+
+  TerminalBackendX(this.pty);
+
+  PseudoTerminal pty;
 
   @override
   void ackProcessed() {
-    // TODO: Wait for pty to catch up.
+    // TODO: implement ackProcessed
   }
 
   @override
-  Future<int> get exitCode => _pseudoTerminal.exitCode;
+  Future<int> get exitCode => pty.exitCode;
 
   @override
   void init() {
-    _pseudoTerminal.out.listen((event) {
+    pty.out.listen((event) {
       _outStream.sink.add(event);
     });
   }
@@ -32,12 +31,12 @@ class FrameBackend implements TerminalBackend {
 
   @override
   void resize(int width, int height, int pixelWidth, int pixelHeight) {
-    _pseudoTerminal.resize(width, height);
+    pty.resize(width, height);
   }
 
   @override
   void terminate() {
-    _pseudoTerminal.kill(ProcessSignal.sigkill);
+    pty.kill(ProcessSignal.sigterm);
     _outStream.close();
   }
 
@@ -49,14 +48,14 @@ class FrameBackend implements TerminalBackend {
 
     if (input == '\r') {
       //_outStream.sink.add('\r\n');
-      _pseudoTerminal.write('\r');
+      pty.write('\r');
     } else if (input.codeUnitAt(0) == 127) {
       // Backspace handling
       //_outStream.sink.add('\b \b');
-      _pseudoTerminal.write('\b \b');
+      pty.write('\b \b');
     } else {
       //_outStream.sink.add(input);
-      _pseudoTerminal.write(input);
+      pty.write(input);
     }
   }
 }
