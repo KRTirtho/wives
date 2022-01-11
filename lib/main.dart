@@ -11,7 +11,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:terminal/views/terminal_view.dart';
+import 'package:terminal/views/terminal_frame.dart';
+import 'package:terminal/views/terminal_settings.dart';
 import 'package:window_size/window_size.dart';
 
 void main() {
@@ -19,11 +20,6 @@ void main() {
 }
 
 class Terminal extends StatelessWidget {
-  // Possible multi-theme switching later on.
-  static ThemeData darkMode = ThemeData(
-    brightness: Brightness.dark,
-  );
-
   const Terminal({Key? key}) : super(key: key);
 
   @override
@@ -32,10 +28,10 @@ class Terminal extends StatelessWidget {
     return FluentApp(
       title: 'Terminal',
       initialRoute: '/',
+      theme: ThemeData(brightness: Brightness.dark),
       routes: {
-        '/': (context) => const TheTerminalView(),
-        // TODO: Implement Settings
-        // '/settings': (context) => SettingsFrame(),
+        "/": (context) => const TerminalFrame(),
+        "/settings": (context) => const TerminalSettings(),
       },
     );
   }
