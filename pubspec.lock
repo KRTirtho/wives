@@ -143,7 +143,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.1"
+    version: "1.8.0"
   platform_info:
     dependency: transitive
     description:
@@ -225,7 +225,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.9"
+    version: "0.4.8"
   typed_data:
     dependency: transitive
     description:
@@ -253,7 +253,7 @@ packages:
       path: "plugins/window_size"
       ref: e48abe7c3e9ebfe0b81622167c5201d4e783bb81
       resolved-ref: e48abe7c3e9ebfe0b81622167c5201d4e783bb81
-      url: "git://github.com/google/flutter-desktop-embedding.git"
+      url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
     version: "0.1.0"
   xterm:
