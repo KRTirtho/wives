@@ -14,7 +14,7 @@ class TerminalBackendX implements TerminalBackend {
 
   @override
   void ackProcessed() {
-    // TODO: implement ackProcessed
+    return;
   }
 
   @override
@@ -32,7 +32,7 @@ class TerminalBackendX implements TerminalBackend {
 
   @override
   void resize(int width, int height, int pixelWidth, int pixelHeight) {
-    pty.resize(width, height);
+    pty.resize(height, width);
   }
 
   @override
@@ -43,10 +43,6 @@ class TerminalBackendX implements TerminalBackend {
 
   @override
   void write(String input) {
-    if (input.isEmpty) {
-      return;
-    }
-
     if (input == '\r') {
       //_outStream.sink.add('\r\n');
       pty.write(const Utf8Encoder().convert('\r'));
