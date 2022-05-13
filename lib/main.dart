@@ -13,7 +13,6 @@ limitations under the License.
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:terminal/views/terminal_frame.dart';
 import 'package:terminal/views/terminal_settings.dart';
-import 'package:window_size/window_size.dart';
 
 void main() {
   runApp(const Terminal());
@@ -24,7 +23,7 @@ class Terminal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    setWindowTitle("Terminal");
+    //setWindowTitle("Terminal");
     return FluentApp(
       title: 'Terminal',
       initialRoute: '/',

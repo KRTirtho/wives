@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:pty/pty.dart';
+import 'package:flutter_pty/flutter_pty.dart';
 import 'package:terminal/constants/constants.dart';
 import 'package:terminal/views/terminal_settings.dart';
 import 'package:xterm/frontend/terminal_view.dart';
@@ -15,9 +15,9 @@ class TerminalFrame extends StatefulWidget {
   State<TerminalFrame> createState() => _TerminalFrameState();
 }
 
-PseudoTerminal get _pty => PseudoTerminal.start(
+Pty get _pty => Pty.start(
       shell,
-      ['-l'],
+      //['-l'],
       environment: {'TERM': 'xterm-256color'},
     );
 

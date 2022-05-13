@@ -1,7 +1,8 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
-import 'package:pty/pty.dart';
+import 'package:flutter_pty/flutter_pty.dart';
 import 'package:xterm/xterm.dart';
 
 class TerminalBackendX implements TerminalBackend {
@@ -9,7 +10,7 @@ class TerminalBackendX implements TerminalBackend {
 
   TerminalBackendX(this.pty);
 
-  PseudoTerminal pty;
+  Pty pty;
 
   @override
   void ackProcessed() {
@@ -21,8 +22,8 @@ class TerminalBackendX implements TerminalBackend {
 
   @override
   void init() {
-    pty.out.listen((event) {
-      _outStream.sink.add(event);
+    pty.output.cast<List<int>>().transform(const Utf8Decoder()).listen((text) {
+      _outStream.sink.add(text);
     });
   }
 
@@ -48,14 +49,14 @@ class TerminalBackendX implements TerminalBackend {
 
     if (input == '\r') {
       //_outStream.sink.add('\r\n');
-      pty.write('\r');
+      pty.write(const Utf8Encoder().convert('\r'));
     } else if (input.codeUnitAt(0) == 127) {
       // Backspace handling
       //_outStream.sink.add('\b \b');
-      pty.write('\b \b');
+      pty.write(const Utf8Encoder().convert('\b \b'));
     } else {
       //_outStream.sink.add(input);
-      pty.write(input);
+      pty.write(const Utf8Encoder().convert(input));
     }
   }
 }
