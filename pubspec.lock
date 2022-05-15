@@ -74,12 +74,10 @@ packages:
   fluent_ui:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "bugfix/flutter_3.0.0"
-      resolved-ref: a60a2dff9c344ec212f35230fc58c15964231b4f
-      url: "https://github.com/h3x4d3c1m4l/fluent_ui.git"
-    source: git
-    version: "3.11.1"
+      name: fluent_ui
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.12.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -251,4 +249,4 @@ packages:
     version: "3.0.6-alpha"
 sdks:
   dart: ">=2.17.0 <3.0.0"
-  flutter: ">=2.12.0"
+  flutter: ">=3.0.0"
