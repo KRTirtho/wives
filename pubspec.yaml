@@ -14,9 +14,10 @@ dependencies:
     git: 
       url: https://github.com/TerminalStudio/xterm.dart.git
       ref: v3
-  flutter_pty: ^0.1.1
+  flutter_pty: ^0.2.0
   flutter_lints: ^2.0.1
-  fluent_ui: 3.12.0
+  zenit_ui: 
+    git: https://github.com/dahliaOS/zenit_ui.git
 
 dev_dependencies:
   flutter_test:

@@ -10,9 +10,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import 'package:fluent_ui/fluent_ui.dart';
 import 'package:terminal/views/terminal_frame.dart';
 import 'package:terminal/views/terminal_settings.dart';
+import 'package:zenit_ui/zenit_ui.dart';
 
 void main() {
   runApp(const Terminal());
@@ -24,10 +24,13 @@ class Terminal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //setWindowTitle("Terminal");
-    return FluentApp(
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Terminal',
       initialRoute: '/',
-      theme: ThemeData(brightness: Brightness.dark),
+      theme: ThemeEngine.zenitDefaultLightTheme,
+      darkTheme: ThemeEngine.zenitDefaultDarkTheme,
+      themeMode: ThemeMode.dark,
       routes: {
         "/": (context) => const TerminalFrame(),
         "/settings": (context) => const TerminalSettings(),
