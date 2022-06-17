@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(terminal LANGUAGES CXX)
+project(wives LANGUAGES CXX)
 
-set(BINARY_NAME "terminal")
+set(BINARY_NAME "wives")
 
 cmake_policy(SET CMP0063 NEW)
 

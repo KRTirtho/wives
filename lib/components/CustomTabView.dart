@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:terminal/components/WindowTitleBar.dart';
+import 'package:wives/components/WindowTitleBar.dart';
 
 class CustomTabView extends HookWidget {
   final List<Widget> tabs;

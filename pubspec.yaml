@@ -1,7 +1,7 @@
-name: terminal
-description: The default xterm for dahliaOS
+name: wives
+description: A Terminal that is as beautiful as your wife or probably better
 
-publish_to: 'none'
+publish_to: "none"
 version: 2.0.0+2
 
 environment:
@@ -10,15 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  xterm: 
-    git: 
+  xterm:
+    git:
       url: https://github.com/TerminalStudio/xterm.dart.git
       ref: v3
   flutter_pty: ^0.2.0
   flutter_lints: ^2.0.1
   flutter_hooks: ^0.18.3
-  zenit_ui: 
-    git: https://github.com/dahliaOS/zenit_ui.git
   collection: ^1.16.0
   window_manager: ^0.2.5
 

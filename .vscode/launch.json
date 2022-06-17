@@ -5,18 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "terminal",
+      "name": "wives",
       "request": "launch",
       "type": "dart"
     },
     {
-      "name": "terminal (profile mode)",
+      "name": "wives (profile mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "terminal (release mode)",
+      "name": "wives (release mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"
