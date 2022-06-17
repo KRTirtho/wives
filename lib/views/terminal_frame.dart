@@ -47,39 +47,34 @@ class TerminalFrame extends HookWidget {
     final tabEntries =
         useMemoized(() => tabs.value.entries.toList(), [tabs.value]);
 
-    return Scaffold(
-      body: CustomTabView(
-        tabs: tabs.value.entries
-            .mapIndexed((i, _) => Text("Terminal $i"))
-            .toList(),
-        onNewTab: () {
-          tabs.value = {
-            ...tabs.value,
-            FocusNode(): Constants.terminal(_pty),
-          };
-          return tabs.value.length - 1;
-        },
-        onClose: (i) {
-          tabs.value = Map.fromEntries(
-            tabEntries.where(
-              (entry) =>
-                  entry.key != tabEntries[i].key &&
-                  entry.value != tabEntries[i].value,
-            ),
-          );
-          return tabs.value.length - 1;
-        },
-        children: tabEntries.map((tab) {
-          return Expanded(
-            child: TerminalView(
-              padding: 5,
-              terminal: tab.value,
-              autofocus: true,
-              focusNode: tab.key,
-            ),
-          );
-        }).toList(),
-      ),
+    return CustomTabView(
+      tabs:
+          tabs.value.entries.mapIndexed((i, _) => Text("Terminal $i")).toList(),
+      onNewTab: () {
+        tabs.value = {
+          ...tabs.value,
+          FocusNode(): Constants.terminal(_pty),
+        };
+        return tabs.value.length - 1;
+      },
+      onClose: (i) {
+        tabs.value = Map.fromEntries(
+          tabEntries.where(
+            (entry) =>
+                entry.key != tabEntries[i].key &&
+                entry.value != tabEntries[i].value,
+          ),
+        );
+        return tabs.value.length - 1;
+      },
+      children: tabEntries.map((tab) {
+        return TerminalView(
+          padding: 5,
+          terminal: tab.value,
+          autofocus: true,
+          focusNode: tab.key,
+        );
+      }).toList(),
     );
   }
 }

@@ -3,8 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  screen_retriever
-  window_manager
+  bitsdojo_window_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

@@ -1,95 +1,80 @@
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:window_manager/window_manager.dart';
+import 'dart:ui';
 
-class WindowTitleBar extends StatefulWidget {
+import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter/material.dart';
+
+class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? leading;
+  final Widget? center;
   final Widget? nonDraggableLeading;
   const WindowTitleBar({
     this.leading,
+    this.center,
     this.nonDraggableLeading,
     super.key,
   });
 
   @override
   State<WindowTitleBar> createState() => _WindowTitleBarState();
+
+  @override
+  Size get preferredSize => appWindow.size;
 }
 
-class _WindowTitleBarState extends State<WindowTitleBar> with WindowListener {
-  bool isMaximized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    windowManager.addListener(this);
-    windowManager.isMaximized().then((maximized) {
-      setState(() {
-        isMaximized = maximized;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void onWindowMaximize() {
-    setState(() {
-      isMaximized = true;
-    });
-  }
-
-  @override
-  void onWindowUnmaximize() {
-    setState(() {
-      isMaximized = false;
-    });
-  }
-
+class _WindowTitleBarState extends State<WindowTitleBar> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (widget.nonDraggableLeading != null) widget.nonDraggableLeading!,
-        Expanded(
-          child: GestureDetector(
-            onPanStart: (details) {
-              windowManager.startDragging();
-            },
-            child: widget.leading ?? const Text(""),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).backgroundColor.withOpacity(0.7),
+        // mitigates the bitsdojo_window bug with gtk_window in linux
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
         ),
-        GestureDetector(
-          onPanStart: (details) {
-            windowManager.startDragging();
-          },
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox(
+          height: 50,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              WindowCaptionButton.minimize(
-                brightness: Brightness.dark,
-                onPressed: windowManager.minimize,
+              if (widget.nonDraggableLeading != null)
+                widget.nonDraggableLeading!,
+              Expanded(
+                child: GestureDetector(
+                  onPanUpdate: (_) => appWindow.startDragging(),
+                  child: widget.leading ?? const Text(""),
+                ),
               ),
-              isMaximized
-                  ? WindowCaptionButton.unmaximize(
-                      brightness: Brightness.dark,
-                      onPressed: windowManager.unmaximize,
-                    )
-                  : WindowCaptionButton.maximize(
-                      brightness: Brightness.dark,
-                      onPressed: windowManager.maximize,
+              if (widget.center != null)
+                GestureDetector(
+                  onPanUpdate: (_) => appWindow.startDragging(),
+                  child: widget.center,
+                ),
+              GestureDetector(
+                onPanUpdate: (_) => appWindow.startDragging(),
+                child: Row(
+                  children: [
+                    MinimizeWindowButton(
+                      onPressed: appWindow.minimize,
                     ),
-              WindowCaptionButton.close(
-                brightness: Brightness.dark,
-                onPressed: windowManager.close,
+                    MaximizeWindowButton(
+                      onPressed: () {
+                        appWindow.maximizeOrRestore();
+                      },
+                    ),
+                    CloseWindowButton(
+                      onPressed: appWindow.close,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
