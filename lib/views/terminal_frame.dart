@@ -1,17 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_pty/flutter_pty.dart';
-import 'package:terminal/constants/constants.dart';
+import 'package:terminal/components/CustomTabView.dart';
+import 'package:terminal/models/constants.dart';
 import 'package:xterm/frontend/terminal_view.dart';
 import 'package:xterm/xterm.dart';
-import 'package:zenit_ui/zenit_ui.dart';
-
-class TerminalFrame extends StatefulWidget {
-  const TerminalFrame({Key? key}) : super(key: key);
-
-  @override
-  State<TerminalFrame> createState() => _TerminalFrameState();
-}
+import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 Pty get _pty => Pty.start(
       shell,
@@ -21,57 +17,68 @@ Pty get _pty => Pty.start(
 
 String get shell {
   if (Platform.isWindows) {
-    return r'cmd.exe';
+    return 'cmd.exe';
   } else {
     if (File("/usr/bin/zsh").existsSync()) {
-      return r'zsh';
+      return 'zsh';
     }
     if (File("/usr/bin/bash").existsSync()) {
-      return r'bash';
+      return 'bash';
     }
     return "sh";
   }
 }
 
-class _TerminalFrameState extends State<TerminalFrame> {
-  final Map<FocusNode, Terminal> tabs = {
-    FocusNode(): Constants.terminal(_pty),
-  };
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    tabs.entries.first.key.requestFocus();
-  }
+class TerminalFrame extends HookWidget {
+  const TerminalFrame({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: TabView(
-        pages: tabs
-            .map((FocusNode focusNode, Terminal terminal) => MapEntry(
-                focusNode,
-                TabViewPage(
-                  title: "Terminal",
-                  view: TerminalView(
-                    terminal: terminal,
-                    focusNode: focusNode,
-                  ),
-                )))
-            .values
+    final tabs = useState<Map<FocusNode, Terminal>>({
+      FocusNode(): Constants.terminal(_pty),
+    });
+
+    useEffect(() {
+      // requesting focus to the latest terminal
+      tabs.value.entries.last.key.requestFocus();
+      return null;
+    }, [tabs.value]);
+
+    final tabEntries =
+        useMemoized(() => tabs.value.entries.toList(), [tabs.value]);
+
+    return Scaffold(
+      body: CustomTabView(
+        tabs: tabs.value.entries
+            .mapIndexed((i, _) => Text("Terminal $i"))
             .toList(),
-        onNewPage: () => setState(() {
-          tabs.addEntries([MapEntry(FocusNode(), Constants.terminal(_pty))]);
-        }),
-        onPageClosed: (index) {
-          tabs.removeWhere((key, value) =>
-              tabs.entries.elementAt(index).key == key &&
-              tabs.entries.elementAt(index).value == value);
-          tabs.entries.elementAt(tabs.length - 1).key.requestFocus();
+        onNewTab: () {
+          tabs.value = {
+            ...tabs.value,
+            FocusNode(): Constants.terminal(_pty),
+          };
+          return tabs.value.length - 1;
         },
-        onPageChanged: (index) {
-          tabs.entries.elementAt(index).key.requestFocus();
+        onClose: (i) {
+          tabs.value = Map.fromEntries(
+            tabEntries.where(
+              (entry) =>
+                  entry.key != tabEntries[i].key &&
+                  entry.value != tabEntries[i].value,
+            ),
+          );
+          return tabs.value.length - 1;
         },
+        children: tabEntries.map((tab) {
+          return Expanded(
+            child: TerminalView(
+              padding: 5,
+              terminal: tab.value,
+              autofocus: true,
+              focusNode: tab.key,
+            ),
+          );
+        }).toList(),
       ),
     );
   }

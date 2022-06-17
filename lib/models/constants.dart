@@ -1,5 +1,5 @@
 import 'package:flutter_pty/flutter_pty.dart';
-import 'package:terminal/backend/backend.dart';
+import 'package:terminal/services/backend.dart';
 import 'package:xterm/xterm.dart';
 
 class Constants {

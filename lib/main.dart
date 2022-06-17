@@ -12,9 +12,26 @@ limitations under the License.
 */
 import 'package:terminal/views/terminal_frame.dart';
 import 'package:terminal/views/terminal_settings.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:zenit_ui/zenit_ui.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Must add this line.
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.setTitle("Terminal");
+    await windowManager.show();
+    await windowManager.focus();
+  });
   runApp(const Terminal());
 }
 
@@ -23,7 +40,6 @@ class Terminal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //setWindowTitle("Terminal");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Terminal',

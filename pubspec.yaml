@@ -16,8 +16,11 @@ dependencies:
       ref: v3
   flutter_pty: ^0.2.0
   flutter_lints: ^2.0.1
+  flutter_hooks: ^0.18.3
   zenit_ui: 
     git: https://github.com/dahliaOS/zenit_ui.git
+  collection: ^1.16.0
+  window_manager: ^0.2.5
 
 dev_dependencies:
   flutter_test:
