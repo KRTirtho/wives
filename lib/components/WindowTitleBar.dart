@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
@@ -26,17 +26,19 @@ class _WindowTitleBarState extends State<WindowTitleBar> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).backgroundColor.withOpacity(0.7),
+        color: Theme.of(context).backgroundColor,
         // mitigates the bitsdojo_window bug with gtk_window in linux
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10),
-        ),
+        borderRadius: Platform.isLinux
+            ? const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              )
+            : null,
       ),
       child: Material(
         type: MaterialType.transparency,
         child: SizedBox(
-          height: 50,
+          height: 45,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

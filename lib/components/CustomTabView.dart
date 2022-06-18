@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
+import 'package:wives/hooks/useAutoScrollController.dart';
+import 'package:wives/services/native.dart';
 
 class CycleForwardTabsIntent extends Intent {}
 
@@ -17,7 +20,7 @@ class CustomTabView extends HookWidget {
   final List<Widget> children;
 
   final int Function(int index)? onClose;
-  final int Function()? onNewTab;
+  final int Function(String shell)? onNewTab;
 
   const CustomTabView({
     required this.tabs,
@@ -30,7 +33,7 @@ class CustomTabView extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final activeIndex = useState(0);
-    final scrollController = useScrollController();
+    final scrollController = useAutoScrollController();
 
     useEffect(() {
       if (tabs.length != children.length) {
@@ -40,10 +43,16 @@ class CustomTabView extends HookWidget {
       return null;
     }, [tabs, children]);
 
-    final createNewTab = useCallback(() {
-      final index = onNewTab?.call();
+    final createNewTab = useCallback((String shell) {
+      final index = onNewTab?.call(shell);
 
-      if (index != null) activeIndex.value = index;
+      if (index != null) {
+        activeIndex.value = index;
+        scrollController.scrollToIndex(
+          index,
+          preferPosition: AutoScrollPosition.begin,
+        );
+      }
     }, [activeIndex.value]);
 
     final closeTab = useCallback((int i) {
@@ -54,6 +63,8 @@ class CustomTabView extends HookWidget {
         activeIndex.value = index;
       }
     }, [activeIndex.value]);
+
+    final shells = useMemoized(() => NativeUtils.getShells(), []);
 
     return Shortcuts(
       shortcuts: {
@@ -82,6 +93,10 @@ class CustomTabView extends HookWidget {
               } else {
                 activeIndex.value = activeIndex.value + 1;
               }
+              scrollController.scrollToIndex(
+                activeIndex.value,
+                preferPosition: AutoScrollPosition.end,
+              );
               return null;
             },
           ),
@@ -92,11 +107,15 @@ class CustomTabView extends HookWidget {
               } else {
                 activeIndex.value = activeIndex.value - 1;
               }
+              scrollController.scrollToIndex(
+                activeIndex.value,
+                preferPosition: AutoScrollPosition.end,
+              );
               return null;
             },
           ),
-          NewTabIntent:
-              CallbackAction<NewTabIntent>(onInvoke: (_) => createNewTab()),
+          NewTabIntent: CallbackAction<NewTabIntent>(
+              onInvoke: (_) => createNewTab(shells.last)),
           CloseCurrentTabIntent: CallbackAction<CloseCurrentTabIntent>(
               onInvoke: (_) => closeTab(activeIndex.value)),
         },
@@ -104,57 +123,97 @@ class CustomTabView extends HookWidget {
           autofocus: true,
           child: Scaffold(
             appBar: WindowTitleBar(
-              nonDraggableLeading: Center(
-                child: IconButton(
-                  hoverColor: Colors.grey.withOpacity(0.2),
-                  icon: const Icon(Icons.add_rounded),
-                  onPressed: createNewTab,
-                ),
-              ),
               leading: Scrollbar(
                 controller: scrollController,
-                child: SingleChildScrollView(
+                child: ListView.builder(
                   controller: scrollController,
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: tabs
-                        .mapIndexed(
-                          (i, tab) => InkWell(
-                            onTap: activeIndex.value != i
-                                ? () {
-                                    activeIndex.value = i;
-                                  }
+                  shrinkWrap: true,
+                  itemCount: tabs.length + 1,
+                  itemBuilder: (context, i) {
+                    if (tabs.length == i) {
+                      return Center(
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 5),
+                            CompactIconButton(
+                              onPressed: () => createNewTab(shells.last),
+                              child: const Icon(Icons.add_rounded),
+                            ),
+                            PopupMenuButton<String>(
+                              position: PopupMenuPosition.under,
+                              onSelected: (value) {
+                                createNewTab(value);
+                              },
+                              offset: const Offset(0, 10),
+                              tooltip: "Shells",
+                              itemBuilder: (context) {
+                                return shells
+                                    .map((shell) => PopupMenuItem(
+                                          value: shell,
+                                          child: Text(shell),
+                                        ))
+                                    .toList();
+                              },
+                              child:
+                                  const Icon(Icons.keyboard_arrow_down_rounded),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final tab = tabs[i];
+                    return AutoScrollTag(
+                      controller: scrollController,
+                      index: i,
+                      key: ValueKey(i),
+                      child: InkWell(
+                        onTap: activeIndex.value != i
+                            ? () {
+                                activeIndex.value = i;
+                                scrollController.scrollToIndex(
+                                  i,
+                                  preferPosition: AutoScrollPosition.end,
+                                );
+                              }
+                            : null,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 100),
+                          margin: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: activeIndex.value == i
+                                ? Colors.grey[800]
                                 : null,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 100),
-                              margin: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: activeIndex.value == i
-                                    ? Colors.grey[800]
-                                    : null,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: Material(
-                                type: MaterialType.transparency,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: Row(children: [
-                                    tab,
-                                    IconButton(
-                                      icon: const Icon(Icons.close_rounded),
-                                      iconSize: 15,
-                                      onPressed: () => closeTab(i),
-                                    )
-                                  ]),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
                                 ),
+                                child: Row(children: [
+                                  tab,
+                                  const SizedBox(width: 5),
+                                  CompactIconButton(
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      size: 15,
+                                    ),
+                                    onPressed: () => closeTab(i),
+                                  )
+                                ]),
                               ),
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
