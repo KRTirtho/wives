@@ -48,6 +48,8 @@ class TerminalFrame extends HookWidget {
         return tabs.value.length - 1;
       },
       onClose: (i) {
+        final prevEntry = tabEntries[i].value;
+        prevEntry.terminateBackend();
         tabs.value = Map.fromEntries(
           tabEntries.where(
             (entry) =>

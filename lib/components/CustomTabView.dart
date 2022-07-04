@@ -5,6 +5,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
+import 'package:wives/hooks/usePaletteOverlay.dart';
 import 'package:wives/services/native.dart';
 
 class CycleForwardTabsIntent extends Intent {}
@@ -14,6 +15,8 @@ class CycleBackwardsTabsIntent extends Intent {}
 class NewTabIntent extends Intent {}
 
 class CloseCurrentTabIntent extends Intent {}
+
+class OpenCommandPaletteIntent extends Intent {}
 
 class CustomTabView extends HookWidget {
   final List<Widget> tabs;
@@ -66,6 +69,8 @@ class CustomTabView extends HookWidget {
 
     final shells = useMemoized(() => NativeUtils.getShells(), []);
 
+    final openPalette = usePaletteOverlay();
+
     return Shortcuts(
       shortcuts: {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.tab):
@@ -83,6 +88,10 @@ class CustomTabView extends HookWidget {
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.keyW,
         ): CloseCurrentTabIntent(),
+        LogicalKeySet(
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.keyP,
+        ): OpenCommandPaletteIntent(),
       },
       child: Actions(
         actions: {
@@ -118,6 +127,11 @@ class CustomTabView extends HookWidget {
               onInvoke: (_) => createNewTab(shells.last)),
           CloseCurrentTabIntent: CallbackAction<CloseCurrentTabIntent>(
               onInvoke: (_) => closeTab(activeIndex.value)),
+          OpenCommandPaletteIntent: CallbackAction<OpenCommandPaletteIntent>(
+            onInvoke: (intent) {
+              openPalette();
+            },
+          )
         },
         child: Focus(
           autofocus: true,
