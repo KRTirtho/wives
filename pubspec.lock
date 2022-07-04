@@ -278,11 +278,9 @@ packages:
   xterm:
     dependency: "direct main"
     description:
-      path: "."
-      ref: v3
-      resolved-ref: "2c6648bd113bbd9d0d1fe51eab011a06a8e4eb70"
-      url: "https://github.com/TerminalStudio/xterm.dart.git"
-    source: git
+      name: xterm
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "3.0.6-alpha"
 sdks:
   dart: ">=2.17.0 <3.0.0"

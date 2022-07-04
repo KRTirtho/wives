@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:wives/components/PlatformTitleButtons.dart';
 
 class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? leading;
@@ -26,11 +27,7 @@ class _WindowTitleBarState extends State<WindowTitleBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: Platform.isLinux && !appWindow.isMaximized
-          ? const EdgeInsets.only(
-              top: 0.5,
-              right: 0.5,
-              left: 0.5,
-            )
+          ? const EdgeInsets.all(0.5)
           : null,
       decoration: BoxDecoration(
         color: Colors.grey[800],
@@ -77,22 +74,9 @@ class _WindowTitleBarState extends State<WindowTitleBar> {
                   ),
                 GestureDetector(
                   onPanUpdate: (_) => appWindow.startDragging(),
-                  child: Row(
-                    children: [
-                      MinimizeWindowButton(
-                        onPressed: appWindow.minimize,
-                      ),
-                      MaximizeWindowButton(
-                        onPressed: () {
-                          appWindow.maximizeOrRestore();
-                          setState(() {});
-                        },
-                      ),
-                      CloseWindowButton(
-                        onPressed: appWindow.close,
-                      ),
-                    ],
-                  ),
+                  child: Platform.isWindows
+                      ? const WindowsTitleButtons()
+                      : const LinuxTitleButtons(),
                 ),
               ],
             ),
