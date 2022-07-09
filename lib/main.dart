@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:wives/views/terminal_frame.dart';
-import 'package:wives/views/terminal_settings.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wives/views/TerminalFrame.dart';
+import 'package:wives/views/TerminalSettings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +14,7 @@ void main() async {
     appWindow.alignment = Alignment.center;
     appWindow.show();
   });
-  runApp(const Terminal());
+  runApp(const ProviderScope(child: Terminal()));
 }
 
 class Terminal extends StatelessWidget {

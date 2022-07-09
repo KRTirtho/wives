@@ -19,6 +19,10 @@ dependencies:
   fluentui_system_icons: ^1.1.170
   scroll_to_index: ^3.0.1
   path: ^1.8.1
+  riverpod: ^1.0.3
+  hooks_riverpod: ^1.0.4
+  resizable_widget: ^1.0.5
+  flutter_spinbox: ^0.9.0
 
 dev_dependencies:
   flutter_test:

@@ -1,72 +1,59 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_pty/flutter_pty.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
+import 'package:wives/models/constants.dart';
+import 'package:wives/providers/PreferencesProvider.dart';
+import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/services/native.dart';
+import 'package:xterm/frontend/terminal_view.dart';
+import 'package:flutter/material.dart';
+import 'package:xterm/xterm.dart';
 
-class CustomTabView extends HookWidget {
-  final List<Widget> tabs;
-  final List<Widget> children;
-
-  final void Function(int index) onCopy;
-  final void Function(int index) onPaste;
-  final void Function(int index) onRequestFocus;
-  final void Function(int index) onUnfocus;
-
-  final int Function(int index)? onClose;
-  final int Function(String shell)? onNewTab;
-
-  const CustomTabView({
-    required this.tabs,
-    required this.children,
-    required this.onCopy,
-    required this.onPaste,
-    required this.onRequestFocus,
-    required this.onUnfocus,
-    this.onClose,
-    this.onNewTab,
-    Key? key,
-  }) : super(key: key);
+class TerminalFrame extends HookConsumerWidget {
+  const TerminalFrame({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final shells = NativeUtils.getShells();
+    final terminalStore = ref.watch(terminalProvider);
+    final preferences = ref.watch(preferencesProvider);
+
     final activeIndex = useState(0);
     final scrollController = useAutoScrollController();
 
-    useEffect(() {
-      if (tabs.length != children.length) {
-        throw Exception(
-            "Length of tabs & children should be equal but found ${tabs.length} tabs but ${children.length} children");
-      }
-      return null;
-    }, [tabs, children]);
-
     final createNewTab = useCallback((String shell) {
-      final index = onNewTab?.call(shell);
+      terminalStore.addTerminal(
+        Constants.terminal(Pty.start(
+          shell,
+          //['-l'],
+          environment: {'TERM': 'xterm-256color'},
+        )),
+        FocusNode(),
+      );
 
-      if (index != null) {
-        activeIndex.value = index;
-        scrollController.scrollToIndex(
-          index,
-          preferPosition: AutoScrollPosition.begin,
-        );
-      }
+      final index = terminalStore.terminals.length - 1;
+
+      activeIndex.value = index;
+      scrollController.scrollToIndex(
+        index,
+        preferPosition: AutoScrollPosition.begin,
+      );
     }, [activeIndex.value]);
 
     final closeTab = useCallback((int i) {
-      if (children.length <= 1) return;
+      if (terminalStore.terminals.length <= 1) return;
       // closes the Tab/Removes the tab
-      final index = onClose?.call(i);
-      if (index != null) {
-        activeIndex.value = index;
-      }
+      terminalStore
+          .removeTerminal(terminalStore.terminals.entries.elementAt(i).key);
+      final index = terminalStore.terminals.length - 1;
+      activeIndex.value = index;
     }, [activeIndex.value]);
-
-    final shells = useMemoized(() => NativeUtils.getShells(), []);
 
     final openPalette = usePaletteOverlay();
 
@@ -76,14 +63,30 @@ class CustomTabView extends HookWidget {
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.shift,
           LogicalKeyboardKey.keyC,
-        ): () => onCopy(activeIndex.value),
+        ): () async {
+          final tab = terminalStore.terminals.entries
+              .elementAt(activeIndex.value)
+              .value;
+
+          if ((tab.selectedText ?? "").isEmpty == true) return;
+          await Clipboard.setData(ClipboardData(text: tab.selectedText));
+        },
         LogicalKeySet(
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.shift,
           LogicalKeyboardKey.keyV,
-        ): () => onPaste(activeIndex.value),
+        ): () async {
+          final tab = terminalStore.terminals.entries
+              .elementAt(activeIndex.value)
+              .value;
+
+          final data = await Clipboard.getData("text/plain");
+          if (data?.text != null && data!.text!.isNotEmpty) {
+            tab.write(data.text!);
+          }
+        },
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.tab): () {
-          if (tabs.length - 1 == activeIndex.value) {
+          if (terminalStore.terminals.length - 1 == activeIndex.value) {
             activeIndex.value = 0;
           } else {
             activeIndex.value = activeIndex.value + 1;
@@ -99,7 +102,7 @@ class CustomTabView extends HookWidget {
           LogicalKeyboardKey.tab,
         ): () {
           if (activeIndex.value == 0) {
-            activeIndex.value = tabs.length - 1;
+            activeIndex.value = terminalStore.terminals.length - 1;
           } else {
             activeIndex.value = activeIndex.value - 1;
           }
@@ -122,6 +125,20 @@ class CustomTabView extends HookWidget {
         ): () {
           openPalette();
         },
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.comma):
+            () {
+          Navigator.of(context).pushNamed("/settings");
+        },
+
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.equal):
+            () {
+          preferences.setFontSize(preferences.fontSize + 1);
+        },
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.minus):
+            () {
+          preferences.setFontSize(preferences.fontSize - 1);
+        },
+
         // this mitigates the Arrow Up focus change issue
         LogicalKeySet(LogicalKeyboardKey.arrowUp): () {},
         // this mitigates the Tab focus change issue
@@ -137,9 +154,9 @@ class CustomTabView extends HookWidget {
                 controller: scrollController,
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
-                itemCount: tabs.length + 1,
+                itemCount: terminalStore.terminals.length + 1,
                 itemBuilder: (context, i) {
-                  if (tabs.length == i) {
+                  if (terminalStore.terminals.length == i) {
                     return Center(
                       child: Row(
                         children: [
@@ -151,20 +168,49 @@ class CustomTabView extends HookWidget {
                           PopupMenuButton<String>(
                             position: PopupMenuPosition.under,
                             onSelected: (value) {
-                              createNewTab(value);
+                              if (value == "settings") {
+                                Navigator.of(context).pushNamed("/settings");
+                              } else {
+                                createNewTab(value);
+                              }
                             },
                             onCanceled: () {
-                              onRequestFocus(activeIndex.value);
+                              final tab = terminalStore.terminals.entries
+                                  .elementAt(activeIndex.value)
+                                  .key;
+                              tab.requestFocus();
                             },
                             offset: const Offset(0, 10),
                             tooltip: "Shells",
+                            color: Colors.black,
                             itemBuilder: (context) {
-                              return shells
-                                  .map((shell) => PopupMenuItem(
-                                        value: shell,
-                                        child: Text(shell),
-                                      ))
-                                  .toList();
+                              return [
+                                ...shells
+                                    .map((shell) => PopupMenuItem(
+                                          height: 30,
+                                          value: shell,
+                                          child: ListTile(
+                                            dense: true,
+                                            horizontalTitleGap: 0,
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: const Icon(
+                                                Icons.terminal_rounded),
+                                            title: Text(shell),
+                                          ),
+                                        ))
+                                    .toList(),
+                                const PopupMenuItem(
+                                  height: 30,
+                                  value: "settings",
+                                  child: ListTile(
+                                    dense: true,
+                                    horizontalTitleGap: 0,
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: Icon(Icons.settings_outlined),
+                                    title: Text("Settings"),
+                                  ),
+                                )
+                              ];
                             },
                             child:
                                 const Icon(Icons.keyboard_arrow_down_rounded),
@@ -174,7 +220,7 @@ class CustomTabView extends HookWidget {
                     );
                   }
 
-                  final tab = tabs[i];
+                  final tab = "Terminal $i";
                   return AutoScrollTag(
                     controller: scrollController,
                     index: i,
@@ -206,7 +252,7 @@ class CustomTabView extends HookWidget {
                                 vertical: 8.0,
                               ),
                               child: Row(children: [
-                                tab,
+                                Text(tab),
                                 const SizedBox(width: 5),
                                 CompactIconButton(
                                   child: const Icon(
@@ -226,7 +272,17 @@ class CustomTabView extends HookWidget {
               ),
             ),
           ),
-          body: children[activeIndex.value],
+          body: terminalStore.terminals.entries.map((tab) {
+            // internal xterm.dart library was modified to add support for
+            // scrolling thus need to create PR in TerminalStudio/xterm.dart
+            return TerminalView(
+              padding: 5,
+              autofocus: true,
+              terminal: tab.value,
+              focusNode: tab.key,
+              style: TerminalStyle(fontSize: preferences.fontSize),
+            );
+          }).toList()[activeIndex.value],
         ),
       ),
     );
