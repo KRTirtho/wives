@@ -1,0 +1,24 @@
+display_name: Wives
+package_name: wives
+
+maintainer:
+  name: Kingkor Roy Tirtho
+  email: krtirtho@gmail.com
+
+priority: optional
+section: x11
+installed_size: 24400
+
+essential: false
+icon: assets/logo.png
+
+keywords:
+  - Terminal
+  - Shell
+  - Command-Line
+  - Cross-Platform
+
+generic_name: Terminal
+categories:
+  - System
+  - TerminalEmulator

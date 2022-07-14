@@ -1,0 +1,62 @@
+name: Wives Nightly
+on:
+  push:
+    branches:
+      - nightly
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          cache: true
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get install -y tar clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+      - run: |
+          wget -O appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
+          chmod +x appimage-builder-x86_64.AppImage
+          mv appimage-builder-x86_64.AppImage /usr/local/bin/appimage-builder
+
+      - run: |
+          flutter config --enable-linux-desktop
+          flutter pub get
+          dart pub global activate flutter_distributor
+          flutter_distributor package --platform=linux --targets=deb,appimage --skip-clean
+      - run: |
+          mv dist/**/wives-*-linux.deb dist/wives-linux-x86_64.deb
+          mv dist/**/wives-*-linux.AppImage dist/wives-linux-x86_64.AppImage
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Linux-Bundle
+          path: dist/
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      # Build Windows Executable
+      - uses: subosito/flutter-action@v2.2.0
+        with:
+          cache: true
+      - run: |
+          flutter config --enable-windows-desktop
+          flutter pub get
+          dart pub global activate flutter_distributor
+          make innoinstall
+          flutter_distributor package --platform=windows --targets=exe --skip-clean
+
+      # Create Chocolatey Package
+      # setting the sha256 hash for new bundle
+      - run: mv dist/**/wives-*-windows-setup.exe dist/wives-windows-x86_64-setup.exe
+
+      # Upload artifacts
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Windows-Bundle
+          path: dist/
