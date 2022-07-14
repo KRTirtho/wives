@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wives/components/CustomTiles.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
+import 'package:wives/services/native.dart';
 
-class TerminalSettings extends ConsumerWidget {
+class TerminalSettings extends HookConsumerWidget {
   const TerminalSettings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
+    final cwdController = useTextEditingController();
+
     final preferences = ref.watch(preferencesProvider);
+    final shells = useMemoized(() => NativeUtils.getShells(), []);
+
     return Scaffold(
       appBar: WindowTitleBar(
         leading: Center(
@@ -35,6 +42,46 @@ class TerminalSettings extends ConsumerWidget {
                   Theme.of(context).iconTheme.color,
                 ),
                 onChanged: (size) => preferences.setFontSize(size),
+              ),
+            ),
+          ),
+          ListTile(
+            title: const Text("Default Shell"),
+            trailing: DropdownButton<String>(
+              value: preferences.defaultShell,
+              items: shells
+                  .map((shell) => DropdownMenuItem(
+                        value: shell,
+                        child: Text(shell),
+                      ))
+                  .toList(),
+              onChanged: (shell) {
+                if (shell != null) preferences.setDefaultShell(shell);
+              },
+            ),
+          ),
+          CustomTile(
+            title: const Flexible(
+              flex: 5,
+              child: Text("Default Working Directory"),
+            ),
+            trailing: Expanded(
+              flex: 4,
+              child: TextField(
+                controller: cwdController,
+                onSubmitted: (value) {
+                  preferences.setDefaultWorkingDirectory(value);
+                },
+                decoration: InputDecoration(
+                  suffix: ElevatedButton(
+                    child: const Icon(Icons.save_rounded),
+                    onPressed: () {
+                      preferences.setDefaultWorkingDirectory(
+                        cwdController.value.text,
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),

@@ -7,6 +7,7 @@ import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
+import 'package:wives/hooks/useSearchOverlay.dart';
 import 'package:wives/models/constants.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
@@ -29,11 +30,12 @@ class TerminalFrame extends HookConsumerWidget {
 
     final createNewTab = useCallback((String shell) {
       terminalStore.addTerminal(
-        Constants.terminal(Pty.start(
-          shell,
-          //['-l'],
-          environment: {'TERM': 'xterm-256color'},
-        )),
+        Constants.terminal(
+          Pty.start(
+            shell,
+            environment: {'TERM': 'xterm-256color'},
+          ),
+        ),
         FocusNode(),
       );
 
@@ -44,7 +46,7 @@ class TerminalFrame extends HookConsumerWidget {
         index,
         preferPosition: AutoScrollPosition.begin,
       );
-    }, [activeIndex.value]);
+    }, [activeIndex.value, preferences.defaultWorkingDirectory]);
 
     final closeTab = useCallback((int i) {
       if (terminalStore.terminals.length <= 1) return;
@@ -57,8 +59,42 @@ class TerminalFrame extends HookConsumerWidget {
 
     final openPalette = usePaletteOverlay();
 
+    final currentTerminal =
+        terminalStore.terminals.entries.elementAt(activeIndex.value).value;
+
+    final isSearchOpen = useState(false);
+
+    useEffect(() {
+      if (isSearchOpen.value) {
+        isSearchOpen.value = false;
+      }
+      currentTerminal.isUserSearchActive = false;
+      return null;
+    }, [activeIndex.value]);
+
+    useSearchOverlay(
+      isSearchOpen.value,
+      onClose: () {
+        isSearchOpen.value = false;
+        currentTerminal.isUserSearchActive = false;
+      },
+      onSearch: (value) {
+        currentTerminal.userSearchPattern = value;
+      },
+      onUpdateSearchOptions: (options) {
+        currentTerminal.userSearchOptions = options;
+      },
+    );
+
     return CallbackShortcuts(
       bindings: {
+        LogicalKeySet(
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.keyF,
+        ): () {
+          isSearchOpen.value = !isSearchOpen.value;
+          currentTerminal.isUserSearchActive = isSearchOpen.value;
+        },
         LogicalKeySet(
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.shift,
@@ -114,7 +150,7 @@ class TerminalFrame extends HookConsumerWidget {
         LogicalKeySet(
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.keyT,
-        ): () => createNewTab(shells.last),
+        ): () => createNewTab(preferences.defaultShell ?? shells.last),
         LogicalKeySet(
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.keyW,
@@ -162,7 +198,9 @@ class TerminalFrame extends HookConsumerWidget {
                         children: [
                           const SizedBox(width: 5),
                           CompactIconButton(
-                            onPressed: () => createNewTab(shells.last),
+                            onPressed: () => createNewTab(
+                              preferences.defaultShell ?? shells.last,
+                            ),
                             child: const Icon(Icons.add_rounded),
                           ),
                           PopupMenuButton<String>(

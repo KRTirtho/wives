@@ -21,8 +21,8 @@ dependencies:
   path: ^1.8.1
   riverpod: ^1.0.3
   hooks_riverpod: ^1.0.4
-  resizable_widget: ^1.0.5
   flutter_spinbox: ^0.9.0
+  multi_split_view: ^2.1.0
 
 dev_dependencies:
   flutter_test:
