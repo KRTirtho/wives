@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
+import 'package:wives/hooks/useSearchOverlay.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
@@ -35,6 +37,31 @@ class TerminalFrame extends HookConsumerWidget {
     void closeTab(int index) {
       terminal.closeTerminalTab(index);
     }
+
+    final isSearchOpen = useState(false);
+    final currentTerminal = terminal.terminalAt(activeIndex)?.value;
+    useEffect(() {
+      if (isSearchOpen.value) {
+        isSearchOpen.value = false;
+      }
+      currentTerminal?.isUserSearchActive = false;
+      return null;
+    }, [activeIndex]);
+
+    useSearchOverlay(
+      isSearchOpen.value,
+      onClose: () {
+        isSearchOpen.value = false;
+        currentTerminal?.isUserSearchActive = false;
+        terminal.terminalAt(activeIndex)?.key.requestFocus();
+      },
+      onSearch: (value) {
+        currentTerminal?.userSearchPattern = value;
+      },
+      onUpdateSearchOptions: (options) {
+        currentTerminal?.userSearchOptions = options;
+      },
+    );
 
     return CallbackShortcuts(
       bindings: {
@@ -175,8 +202,14 @@ class TerminalFrame extends HookConsumerWidget {
               autofocus: true,
               actions: {
                 CopyPasteIntent: CopyPasteAction(),
+                SearchIntent: CallbackAction<SearchIntent>(onInvoke: (_) {
+                  isSearchOpen.value = !isSearchOpen.value;
+                  currentTerminal?.isUserSearchActive = isSearchOpen.value;
+                }),
               },
               shortcuts: {
+                const SingleActivator(LogicalKeyboardKey.keyF, control: true):
+                    SearchIntent(),
                 const SingleActivator(
                   LogicalKeyboardKey.keyC,
                   control: true,
@@ -193,7 +226,9 @@ class TerminalFrame extends HookConsumerWidget {
                 autofocus: true,
                 terminal: tab.value,
                 focusNode: tab.key,
-                style: TerminalStyle(fontSize: preferences.fontSize),
+                style: TerminalStyle(
+                  fontSize: preferences.fontSize,
+                ),
               ),
             );
           }).toList()[activeIndex],

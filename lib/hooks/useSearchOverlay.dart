@@ -10,14 +10,15 @@ class SearchOverlay extends HookWidget {
   final void Function()? onClose;
   final void Function(String searchString)? onSearch;
   final void Function(TerminalSearchOptions options)? onUpdateSearchOptions;
-  final FocusNode? focusNode;
-  const SearchOverlay({
+  final FocusNode focusNode;
+  SearchOverlay({
     this.onClose,
     this.onSearch,
     this.onUpdateSearchOptions,
-    this.focusNode,
+    FocusNode? focusNode,
     Key? key,
-  }) : super(key: key);
+  })  : focusNode = focusNode ?? FocusNode(),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +33,14 @@ class SearchOverlay extends HookWidget {
         useRegex: useRegex.value,
       ));
     }
+
+    useEffect(() {
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          onClose?.call();
+        }
+      });
+    }, []);
 
     return Align(
       alignment: Alignment.topRight,

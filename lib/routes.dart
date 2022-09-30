@@ -5,7 +5,9 @@ import 'package:wives/views/TerminalFrame.dart';
 import 'package:wives/views/TerminalSettings.dart';
 import 'package:wives/views/TerminalSplitView.dart';
 
+final routerKey = GlobalKey<NavigatorState>();
 final router = GoRouter(
+  navigatorKey: routerKey,
   routes: [
     GoRoute(
       path: '/',

@@ -94,8 +94,11 @@ class Terminal extends HookConsumerWidget {
             FontAdjustmentIntent(ref: ref, adjustment: 1),
         const SingleActivator(LogicalKeyboardKey.minus, control: true):
             FontAdjustmentIntent(ref: ref, adjustment: -1),
-        const SingleActivator(LogicalKeyboardKey.keyP, control: true):
-            const PaletteIntent(),
+        const SingleActivator(
+          LogicalKeyboardKey.keyP,
+          control: true,
+          shift: true,
+        ): const PaletteIntent(),
       },
       actions: {
         ...WidgetsApp.defaultActions,

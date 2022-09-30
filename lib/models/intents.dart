@@ -130,3 +130,5 @@ class CopyPasteAction extends Action<CopyPasteIntent> {
     }
   }
 }
+
+class SearchIntent extends Intent {}
