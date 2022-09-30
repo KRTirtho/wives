@@ -5,7 +5,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/routes.dart';
-import 'package:xterm/terminal/terminal.dart';
+import 'package:xterm/xterm.dart';
 
 enum TabIntentType {
   create,
@@ -99,14 +99,19 @@ enum CopyPasteIntentType {
 class CopyPasteIntent extends Intent {
   final Terminal terminal;
   final CopyPasteIntentType intentType;
-  const CopyPasteIntent(this.terminal, this.intentType);
+  final TerminalController controller;
+  const CopyPasteIntent(
+    this.terminal, {
+    required this.intentType,
+    required this.controller,
+  });
 }
 
 class CopyPasteAction extends Action<CopyPasteIntent> {
   Future<void> copy(CopyPasteIntent intent) async {
     final tab = intent.terminal;
-    if ((tab.selectedText ?? "").isEmpty == true) return;
-    await Clipboard.setData(ClipboardData(text: tab.selectedText));
+    final text = tab.buffer.getText(intent.controller.selection);
+    await Clipboard.setData(ClipboardData(text: text));
   }
 
   Future<void> paste(CopyPasteIntent intent) async {

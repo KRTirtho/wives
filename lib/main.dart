@@ -71,23 +71,6 @@ class Terminal extends HookConsumerWidget {
       themeMode: ThemeMode.dark,
       shortcuts: {
         ...WidgetsApp.defaultShortcuts,
-        const SingleActivator(LogicalKeyboardKey.keyT, control: true):
-            TabIntent(
-          controller: terminalTabScrollController,
-          ref: ref,
-          intentType: TabIntentType.create,
-        ),
-        const SingleActivator(LogicalKeyboardKey.keyW, control: true):
-            TabIntent(
-          controller: terminalTabScrollController,
-          ref: ref,
-          intentType: TabIntentType.close,
-        ),
-        const SingleActivator(LogicalKeyboardKey.tab, control: true): TabIntent(
-          controller: terminalTabScrollController,
-          ref: ref,
-          intentType: TabIntentType.cycleForward,
-        ),
         const SingleActivator(LogicalKeyboardKey.comma, control: true):
             const NavigationIntent(path: "/settings"),
         const SingleActivator(LogicalKeyboardKey.equal, control: true):
@@ -105,6 +88,7 @@ class Terminal extends HookConsumerWidget {
         TabIntent: TabAction(),
         NavigationIntent: NavigationAction(),
         FontAdjustmentIntent: FontAdjustmentAction(),
+        CopyPasteIntent: CopyPasteAction(),
         PaletteIntent: CallbackAction(
           onInvoke: (intent) => openPalette(),
         )

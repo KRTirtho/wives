@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_pty/flutter_pty.dart';
+import 'package:collection/collection.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:wives/models/constants.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
-import 'package:wives/services/native.dart';
 import 'package:xterm/xterm.dart';
 
 /// This class or provider holds all the information for all the terminals
@@ -15,13 +14,7 @@ class Terminals extends ChangeNotifier {
   PreferencesProvider get preferences => ref.read(preferencesProvider);
 
   Terminals(this.ref)
-      : instances = {
-          FocusNode(): Constants.terminal(Pty.start(
-            NativeUtils.getShells().last,
-            //['-l'],
-            environment: {'TERM': 'xterm-256color'},
-          ))
-        },
+      : instances = {FocusNode(): Constants.terminal()},
         activeIndex = 0,
         super();
 
@@ -32,6 +25,7 @@ class Terminals extends ChangeNotifier {
 
   void removeInstance(FocusNode focusNode) {
     instances.remove(focusNode);
+    focusNode.dispose();
     notifyListeners();
   }
 
@@ -41,15 +35,9 @@ class Terminals extends ChangeNotifier {
   }
 
   int createTerminalTab([String? shell]) {
-    final shells = NativeUtils.getShells();
     final focusNode = FocusNode();
     addInstance(
-      Constants.terminal(
-        Pty.start(
-          shell ?? preferences.defaultShell ?? shells.last,
-          environment: {'TERM': 'xterm-256color'},
-        ),
-      ),
+      Constants.terminal(shell ?? preferences.defaultShell),
       focusNode,
     );
 
@@ -69,28 +57,33 @@ class Terminals extends ChangeNotifier {
     terminalAt(activeIndex)?.key.requestFocus();
   }
 
+  void closeTerminalTabByInstance(Terminal terminal) {
+    final node = instances.keys.firstWhereOrNull(
+      (key) => instances[key] == terminal,
+    );
+    if (instances.length <= 1 || node == null) return;
+    // closes the Tab/Removes the tab by instance
+    removeInstance(node);
+    setActiveIndex(instances.length - 1);
+    terminalAt(activeIndex)?.key.requestFocus();
+  }
+
   MapEntry<FocusNode, Terminal>? terminalAt(int index) {
     return instances.entries.toList()[index];
   }
 
   int cycleForwardTerminalTab() {
-    if (instances.length - 1 == activeIndex) {
-      setActiveIndex(0);
-    } else {
-      setActiveIndex(activeIndex + 1);
-    }
-    terminalAt(activeIndex)?.key.requestFocus();
-    return activeIndex;
+    int index = instances.length - 1 == activeIndex ? 0 : activeIndex + 1;
+    setActiveIndex(index);
+    terminalAt(index)?.key.requestFocus();
+    return index;
   }
 
   int cycleBackwardTerminalTab() {
-    if (activeIndex == 0) {
-      setActiveIndex(instances.length - 1);
-    } else {
-      setActiveIndex(activeIndex - 1);
-    }
-    terminalAt(activeIndex)?.key.requestFocus();
-    return activeIndex;
+    int index = activeIndex == 0 ? instances.length - 1 : activeIndex - 1;
+    setActiveIndex(index);
+    terminalAt(index)?.key.requestFocus();
+    return index;
   }
 }
 

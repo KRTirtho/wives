@@ -5,14 +5,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
-import 'package:wives/hooks/useSearchOverlay.dart';
+import 'package:wives/hooks/useTabShorcuts.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/services/native.dart';
-import 'package:xterm/frontend/terminal_view.dart';
 import 'package:flutter/material.dart';
 import 'package:xterm/xterm.dart';
+import 'package:collection/collection.dart';
 
 class TerminalFrame extends HookConsumerWidget {
   final AutoScrollController scrollController;
@@ -44,24 +44,26 @@ class TerminalFrame extends HookConsumerWidget {
       if (isSearchOpen.value) {
         isSearchOpen.value = false;
       }
-      currentTerminal?.isUserSearchActive = false;
+      // currentTerminal?.isUserSearchActive = false;
       return null;
     }, [activeIndex]);
 
-    useSearchOverlay(
-      isSearchOpen.value,
-      onClose: () {
-        isSearchOpen.value = false;
-        currentTerminal?.isUserSearchActive = false;
-        terminal.terminalAt(activeIndex)?.key.requestFocus();
-      },
-      onSearch: (value) {
-        currentTerminal?.userSearchPattern = value;
-      },
-      onUpdateSearchOptions: (options) {
-        currentTerminal?.userSearchOptions = options;
-      },
-    );
+    // useSearchOverlay(
+    //   isSearchOpen.value,
+    //   onClose: () {
+    //     isSearchOpen.value = false;
+    //     currentTerminal?.isUserSearchActive = false;
+    //     terminal.terminalAt(activeIndex)?.key.requestFocus();
+    //   },
+    //   onSearch: (value) {
+    //     currentTerminal?.userSearchPattern = value;
+    //   },
+    //   onUpdateSearchOptions: (options) {
+    //     currentTerminal?.userSearchOptions = options;
+    //   },
+    // );
+
+    final shortcuts = useTabShortcuts(ref, scrollController);
 
     return CallbackShortcuts(
       bindings: {
@@ -197,39 +199,40 @@ class TerminalFrame extends HookConsumerWidget {
               ),
             ),
           ),
-          body: terminal.instances.entries.map((tab) {
-            return FocusableActionDetector(
+          body: terminal.instances.entries.mapIndexed((i, tab) {
+            final isActive = i == activeIndex;
+            final controller = TerminalController();
+            return TerminalView(
+              tab.value,
+              controller: controller,
+              padding: const EdgeInsets.all(5),
               autofocus: true,
-              actions: {
-                CopyPasteIntent: CopyPasteAction(),
-                SearchIntent: CallbackAction<SearchIntent>(onInvoke: (_) {
-                  isSearchOpen.value = !isSearchOpen.value;
-                  currentTerminal?.isUserSearchActive = isSearchOpen.value;
-                }),
-              },
+              focusNode: tab.key,
+              textStyle: TerminalStyle(
+                fontSize: preferences.fontSize,
+                fontFamily: "Cascadia Mono",
+              ),
               shortcuts: {
-                const SingleActivator(LogicalKeyboardKey.keyF, control: true):
-                    SearchIntent(),
+                if (isActive) ...shortcuts,
                 const SingleActivator(
                   LogicalKeyboardKey.keyC,
                   control: true,
                   shift: true,
-                ): CopyPasteIntent(tab.value, CopyPasteIntentType.copy),
+                ): CopyPasteIntent(
+                  tab.value,
+                  intentType: CopyPasteIntentType.copy,
+                  controller: controller,
+                ),
                 const SingleActivator(
                   LogicalKeyboardKey.keyV,
                   control: true,
                   shift: true,
-                ): CopyPasteIntent(tab.value, CopyPasteIntentType.paste),
-              },
-              child: TerminalView(
-                padding: 5,
-                autofocus: true,
-                terminal: tab.value,
-                focusNode: tab.key,
-                style: TerminalStyle(
-                  fontSize: preferences.fontSize,
+                ): CopyPasteIntent(
+                  tab.value,
+                  intentType: CopyPasteIntentType.paste,
+                  controller: controller,
                 ),
-              ),
+              },
             );
           }).toList()[activeIndex],
         ),
