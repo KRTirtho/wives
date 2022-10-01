@@ -4,9 +4,42 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/models/intents.dart';
+import 'package:wives/services/native.dart';
+import 'package:collection/collection.dart';
+
+const digits = [
+  LogicalKeyboardKey.digit1,
+  LogicalKeyboardKey.digit2,
+  LogicalKeyboardKey.digit3,
+  LogicalKeyboardKey.digit4,
+  LogicalKeyboardKey.digit5,
+  LogicalKeyboardKey.digit6,
+  LogicalKeyboardKey.digit7,
+  LogicalKeyboardKey.digit8,
+  LogicalKeyboardKey.digit9,
+  LogicalKeyboardKey.digit0,
+];
 
 Map<SingleActivator, Intent> useTabShortcuts(
     WidgetRef ref, AutoScrollController scrollController) {
+  final shells = NativeUtils.getShells().take(10);
+
+  final Map<SingleActivator, Intent> entries = Map.fromEntries(
+    shells.mapIndexed(
+      (i, shell) {
+        return MapEntry(
+          SingleActivator(digits[i], alt: true, control: true),
+          TabIntent(
+            controller: scrollController,
+            ref: ref,
+            intentType: TabIntentType.create,
+            shell: shell,
+          ),
+        );
+      },
+    ),
+  );
+
   return useMemoized(
       () => {
             const SingleActivator(LogicalKeyboardKey.keyT, control: true):
@@ -27,6 +60,7 @@ Map<SingleActivator, Intent> useTabShortcuts(
               ref: ref,
               intentType: TabIntentType.cycleForward,
             ),
+            ...entries,
           },
-      [ref, scrollController]);
+      [ref, scrollController, entries]);
 }

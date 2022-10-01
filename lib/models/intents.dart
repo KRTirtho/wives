@@ -18,21 +18,24 @@ class TabIntent extends Intent {
   final WidgetRef ref;
   final AutoScrollController controller;
   final TabIntentType intentType;
+  final String? shell;
   const TabIntent({
     required this.ref,
     required this.controller,
     required this.intentType,
+    this.shell,
   });
 }
 
 class TabAction extends Action<TabIntent> {
   @override
   void invoke(intent) {
+    if (router.location != "/") return;
     final terminal = intent.ref.read(terminalProvider);
     switch (intent.intentType) {
       case TabIntentType.create:
         intent.controller.scrollToIndex(
-          terminal.createTerminalTab(),
+          terminal.createTerminalTab(intent.shell),
           preferPosition: AutoScrollPosition.begin,
         );
         break;

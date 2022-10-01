@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
+import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/routes.dart';
@@ -82,6 +83,7 @@ class Terminal extends HookConsumerWidget {
           control: true,
           shift: true,
         ): const PaletteIntent(),
+        ...useTabShortcuts(ref, terminalTabScrollController),
       },
       actions: {
         ...WidgetsApp.defaultActions,
