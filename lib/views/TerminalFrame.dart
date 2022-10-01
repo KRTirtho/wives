@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -175,6 +176,56 @@ class TerminalFrame extends HookConsumerWidget {
             fontSize: preferences.fontSize,
             fontFamily: "Cascadia Mono",
           ),
+          onSecondaryTapDown: (info, cell) {
+            showMenu(
+              context: context,
+              position: RelativeRect.fromLTRB(
+                info.globalPosition.dx,
+                info.globalPosition.dy,
+                info.globalPosition.distance + info.globalPosition.dx,
+                info.globalPosition.distance + info.globalPosition.dy,
+              ),
+              elevation: 0,
+              items: [
+                PopupMenuItem(
+                  value: "copy",
+                  height: 30,
+                  onTap: () {
+                    Actions.of(context).invokeAction(
+                        CopyPasteAction(),
+                        CopyPasteIntent(tab.value,
+                            controller: controller,
+                            intentType: CopyPasteIntentType.copy));
+                  },
+                  child: const ListTile(
+                    dense: true,
+                    horizontalTitleGap: 0,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(FluentIcons.copy_16_regular),
+                    title: Text("Copy"),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "paste",
+                  height: 30,
+                  onTap: () {
+                    Actions.of(context).invokeAction(
+                        CopyPasteAction(),
+                        CopyPasteIntent(tab.value,
+                            controller: controller,
+                            intentType: CopyPasteIntentType.paste));
+                  },
+                  child: const ListTile(
+                    dense: true,
+                    horizontalTitleGap: 0,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(FluentIcons.clipboard_16_regular),
+                    title: Text("Paste"),
+                  ),
+                ),
+              ],
+            );
+          },
           shortcuts: {
             if (isActive) ...shortcuts,
             const SingleActivator(
