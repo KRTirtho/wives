@@ -1,5 +1,9 @@
-# Wives - A Terminal
+<p align="center">
+  <img width="300px" src="assets/logo.svg" alt="Wives Logo">
+</p>
 
-Want beautiful cross-platform terminal but don't want to sacrifice performance? Then Wives is the terminal you're looking for. Its a fork of dahillaOS terminal, but with a lot of improvements.
+# Wives - A Flutter based Terminal
 
-![Screenshot](https://user-images.githubusercontent.com/61944859/174342090-e689e306-303d-4f9d-afc5-db546658a14c.png)
+Want a beautiful cross-platform terminal but don't want to sacrifice performance? Then Wives is the terminal you're looking for
+
+![Screenshot](https://user-images.githubusercontent.com/61944859/193413936-98f0655c-8210-4f85-bee0-5191de6af976.png)
