@@ -1,8 +1,8 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
@@ -12,13 +12,18 @@ import 'package:wives/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
 
-  doWhenWindowReady(() {
-    const initialSize = Size(700, 500);
-    appWindow.minSize = initialSize;
-    appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.show();
+  const windowOptions = WindowOptions(
+    size: Size(700, 500),
+    minimumSize: Size(700, 500),
+    backgroundColor: Colors.transparent,
+    titleBarStyle: TitleBarStyle.hidden,
+    title: 'Wives',
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
   });
   runApp(const ProviderScope(child: Terminal()));
 }

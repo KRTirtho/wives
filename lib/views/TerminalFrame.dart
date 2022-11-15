@@ -41,125 +41,128 @@ class TerminalFrame extends HookConsumerWidget {
     final shortcuts = useTabShortcuts(ref, scrollController);
 
     final appBar = WindowTitleBar(
-        leading: Scrollbar(
-      controller: scrollController,
-      child: ListView.builder(
+      nonDraggableLeading: Scrollbar(
         controller: scrollController,
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: terminal.instances.length + 1,
-        itemBuilder: (context, i) {
-          if (terminal.instances.length == i) {
-            return Center(
-              child: Row(
-                children: [
-                  const SizedBox(width: 5),
-                  CompactIconButton(
-                    onPressed: createNewTab,
-                    child: const Icon(Icons.add_rounded),
-                  ),
-                  PopupMenuButton<String>(
-                    position: PopupMenuPosition.under,
-                    onSelected: (value) {
-                      if (value == "settings") {
-                        GoRouter.of(context).push("/settings");
-                      } else {
-                        createNewTab(value);
-                      }
-                    },
-                    onCanceled: () {
-                      final tab =
-                          terminal.instances.entries.elementAt(activeIndex).key;
-                      tab.requestFocus();
-                    },
-                    offset: const Offset(0, 10),
-                    tooltip: "Shells",
-                    color: Colors.black,
-                    itemBuilder: (context) {
-                      return [
-                        ...shells
-                            .map((shell) => PopupMenuItem(
-                                  height: 30,
-                                  value: shell,
-                                  child: ListTile(
-                                    dense: true,
-                                    horizontalTitleGap: 0,
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: const Icon(Icons.terminal_rounded),
-                                    title: Text(shell),
-                                  ),
-                                ))
-                            .toList(),
-                        const PopupMenuItem(
-                          height: 30,
-                          value: "settings",
-                          child: ListTile(
-                            dense: true,
-                            horizontalTitleGap: 0,
-                            contentPadding: EdgeInsets.zero,
-                            leading: Icon(Icons.settings_outlined),
-                            title: Text("Settings"),
-                          ),
-                        )
-                      ];
-                    },
-                    child: const Icon(Icons.keyboard_arrow_down_rounded),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final tab = "Terminal $i";
-          return AutoScrollTag(
-            controller: scrollController,
-            index: i,
-            key: ValueKey(i),
-            child: InkWell(
-              onTap: activeIndex != i
-                  ? () {
-                      terminal.setActiveIndex(i);
-                      scrollController.scrollToIndex(
-                        i,
-                        preferPosition: AutoScrollPosition.end,
-                      );
-                    }
-                  : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                margin: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: activeIndex == i ? Colors.grey[800] : null,
-                  borderRadius: BorderRadius.circular(2),
+        child: ListView.builder(
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          itemCount: terminal.instances.length + 1,
+          itemBuilder: (context, i) {
+            if (terminal.instances.length == i) {
+              return Center(
+                child: Row(
+                  children: [
+                    const SizedBox(width: 5),
+                    CompactIconButton(
+                      onPressed: createNewTab,
+                      child: const Icon(Icons.add_rounded),
+                    ),
+                    PopupMenuButton<String>(
+                      position: PopupMenuPosition.under,
+                      onSelected: (value) {
+                        if (value == "settings") {
+                          GoRouter.of(context).push("/settings");
+                        } else {
+                          createNewTab(value);
+                        }
+                      },
+                      onCanceled: () {
+                        final tab = terminal.instances.entries
+                            .elementAt(activeIndex)
+                            .key;
+                        tab.requestFocus();
+                      },
+                      offset: const Offset(0, 10),
+                      tooltip: "Shells",
+                      color: Colors.black,
+                      itemBuilder: (context) {
+                        return [
+                          ...shells
+                              .map((shell) => PopupMenuItem(
+                                    height: 30,
+                                    value: shell,
+                                    child: ListTile(
+                                      dense: true,
+                                      horizontalTitleGap: 0,
+                                      contentPadding: EdgeInsets.zero,
+                                      leading:
+                                          const Icon(Icons.terminal_rounded),
+                                      title: Text(shell),
+                                    ),
+                                  ))
+                              .toList(),
+                          const PopupMenuItem(
+                            height: 30,
+                            value: "settings",
+                            child: ListTile(
+                              dense: true,
+                              horizontalTitleGap: 0,
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(Icons.settings_outlined),
+                              title: Text("Settings"),
+                            ),
+                          )
+                        ];
+                      },
+                      child: const Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
+                  ],
                 ),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+              );
+            }
+
+            final tab = "Terminal $i";
+            return AutoScrollTag(
+              controller: scrollController,
+              index: i,
+              key: ValueKey(i),
+              child: InkWell(
+                onTap: activeIndex != i
+                    ? () {
+                        terminal.setActiveIndex(i);
+                        scrollController.scrollToIndex(
+                          i,
+                          preferPosition: AutoScrollPosition.end,
+                        );
+                      }
+                    : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  margin: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: activeIndex == i ? Colors.grey[800] : null,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Material(
+                    type: MaterialType.transparency,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                        ),
+                        child: Row(children: [
+                          Text(tab),
+                          const SizedBox(width: 5),
+                          CompactIconButton(
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 15,
+                            ),
+                            onPressed: () => closeTab(i),
+                          )
+                        ]),
                       ),
-                      child: Row(children: [
-                        Text(tab),
-                        const SizedBox(width: 5),
-                        CompactIconButton(
-                          child: const Icon(
-                            Icons.close_rounded,
-                            size: 15,
-                          ),
-                          onPressed: () => closeTab(i),
-                        )
-                      ]),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-    ));
+    );
 
     return Scaffold(
       appBar: appBar,

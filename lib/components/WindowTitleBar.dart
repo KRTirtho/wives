@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:wives/components/PlatformTitleButtons.dart';
 
 class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
@@ -19,61 +19,35 @@ class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
   State<WindowTitleBar> createState() => _WindowTitleBarState();
 
   @override
-  Size get preferredSize => appWindow.size;
+  Size get preferredSize => const Size.fromHeight(55);
 }
 
 class _WindowTitleBarState extends State<WindowTitleBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: Platform.isLinux && !appWindow.isMaximized
-          ? const EdgeInsets.all(0.5)
-          : null,
-      decoration: BoxDecoration(
-        color: Colors.grey[800],
-        borderRadius: Platform.isLinux && !appWindow.isMaximized
-            ? const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              )
-            : null,
-      ),
+      decoration: BoxDecoration(color: Colors.grey[800]),
       child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).backgroundColor,
-          // mitigates the bitsdojo_window bug with gtk_window in linux
-          borderRadius: Platform.isLinux && !appWindow.isMaximized
-              ? const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                )
-              : null,
-        ),
+        decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
         child: Material(
           type: MaterialType.transparency,
           child: SizedBox(
             height: 45,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (widget.nonDraggableLeading != null)
                   widget.nonDraggableLeading!,
                 Expanded(
-                  child: GestureDetector(
-                    onPanUpdate: (_) => appWindow.startDragging(),
-                    onPanEnd: (_) {
-                      setState(() {});
-                    },
+                  child: DragToMoveArea(
                     child: widget.leading ?? const Text(""),
                   ),
                 ),
                 if (widget.center != null)
-                  GestureDetector(
-                    onPanUpdate: (_) => appWindow.startDragging(),
-                    child: widget.center,
+                  DragToMoveArea(
+                    child: widget.center!,
                   ),
-                GestureDetector(
-                  onPanUpdate: (_) => appWindow.startDragging(),
+                DragToMoveArea(
                   child: Platform.isWindows
                       ? const WindowsTitleButtons()
                       : const LinuxTitleButtons(),

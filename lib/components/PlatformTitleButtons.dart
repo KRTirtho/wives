@@ -1,5 +1,5 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 class WindowsTitleButtons extends StatelessWidget {
   const WindowsTitleButtons({Key? key}) : super(key: key);
@@ -13,7 +13,7 @@ class WindowsTitleButtons extends StatelessWidget {
             padding: EdgeInsets.zero,
             maximumSize: const Size(40, 40),
             minimumSize: const Size(40, 40),
-            primary: Colors.transparent,
+            backgroundColor: Colors.transparent,
             splashFactory: NoSplash.splashFactory,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
@@ -24,17 +24,19 @@ class WindowsTitleButtons extends StatelessWidget {
         child: Row(
           children: [
             ElevatedButton(
-              onPressed: appWindow.minimize,
+              onPressed: windowManager.minimize,
               child: const Icon(Icons.minimize),
             ),
             ElevatedButton(
               child: const Icon(Icons.check_box_outline_blank),
-              onPressed: () {
-                appWindow.maximizeOrRestore();
+              onPressed: () async {
+                await windowManager.isMaximized()
+                    ? await windowManager.unmaximize()
+                    : await windowManager.maximize();
               },
             ),
             ElevatedButton(
-              onPressed: appWindow.close,
+              onPressed: windowManager.close,
               style: ButtonStyle(
                 overlayColor: MaterialStateProperty.all(Colors.red),
               ),
@@ -59,34 +61,42 @@ class LinuxTitleButtons extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           maximumSize: const Size(30, 30),
           minimumSize: const Size(30, 30),
-          primary: Colors.grey[800],
+          backgroundColor: Colors.grey[800],
           splashFactory: NoSplash.splashFactory,
           shape: const CircleBorder(),
         ),
       ),
       child: IconTheme(
-        data: const IconThemeData(size: 12),
+        data: const IconThemeData(size: 14),
         child: Padding(
-          padding: const EdgeInsets.only(top: 10, right: 6),
+          padding: const EdgeInsets.only(right: 6),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: appWindow.minimize,
-                child: const Icon(Icons.minimize),
+                onPressed: windowManager.minimize,
+                child: const FittedBox(
+                  child: Icon(Icons.minimize),
+                ),
               ),
               ElevatedButton(
-                child: const Icon(Icons.check_box_outline_blank),
-                onPressed: () {
-                  appWindow.maximizeOrRestore();
+                child: const FittedBox(
+                  child: Icon(Icons.check_box_outline_blank),
+                ),
+                onPressed: () async {
+                  await windowManager.isMaximized()
+                      ? await windowManager.unmaximize()
+                      : await windowManager.maximize();
                 },
               ),
               ElevatedButton(
-                onPressed: appWindow.close,
+                onPressed: windowManager.close,
                 style: ButtonStyle(
                   overlayColor: MaterialStateProperty.all(Colors.red),
                 ),
-                child: const Icon(Icons.close),
+                child: const FittedBox(
+                  child: Icon(Icons.close),
+                ),
               ),
             ],
           ),
