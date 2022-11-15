@@ -76,6 +76,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       darkTheme: ThemeData.dark().copyWith(
         backgroundColor: Colors.black,
         scaffoldBackgroundColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
         buttonTheme: ButtonThemeData(
           hoverColor: Colors.grey.withOpacity(0.2),
         ),

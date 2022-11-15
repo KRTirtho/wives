@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:wives/components/KeyboardKey.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/models/palette_actions.dart';
+import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
 
 final Set<PaletteAction> actionsMap = {
@@ -31,6 +32,30 @@ final Set<PaletteAction> actionsMap = {
         LogicalKeySet(LogicalKeyboardKey.keyS, LogicalKeyboardKey.control),
     onInvoke: (context, ref) async {
       GoRouter.of(context).push("/settings");
+    },
+  ),
+  PaletteAction(
+    title: "Increase Font Size",
+    icon: FluentIcons.font_increase_20_regular,
+    shortcut:
+        LogicalKeySet(LogicalKeyboardKey.equal, LogicalKeyboardKey.control),
+    closeAfterClick: false,
+    onInvoke: (context, ref) async {
+      ref.read(preferencesProvider).setFontSize(
+            ref.read(preferencesProvider).fontSize + 1,
+          );
+    },
+  ),
+  PaletteAction(
+    title: "Decrease Font Size",
+    icon: FluentIcons.font_decrease_20_regular,
+    closeAfterClick: false,
+    shortcut:
+        LogicalKeySet(LogicalKeyboardKey.minus, LogicalKeyboardKey.control),
+    onInvoke: (context, ref) async {
+      ref.read(preferencesProvider).setFontSize(
+            ref.read(preferencesProvider).fontSize - 1,
+          );
     },
   ),
   PaletteAction(
