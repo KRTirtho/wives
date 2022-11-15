@@ -8,7 +8,7 @@ class PaletteAction {
   final String? description;
   final IconData icon;
   final bool closeAfterClick;
-  final SingleActivator? shortcut;
+  final LogicalKeySet? shortcut;
   final FutureOr<void> Function(BuildContext context, WidgetRef ref) onInvoke;
 
   PaletteAction({

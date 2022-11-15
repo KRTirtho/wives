@@ -48,7 +48,7 @@ static void my_application_activate(GApplication* application) {
   }
 
   gtk_window_set_default_size(window, 1280, 720);
-  gtk_widget_show(GTK_WIDGET(window));
+  gtk_widget_realize(GTK_WIDGET(window));
   auto gdk_window = gtk_widget_get_window(GTK_WIDGET(window));
   gdk_window_set_decorations(gdk_window, GdkWMDecoration::GDK_DECOR_BORDER);
 

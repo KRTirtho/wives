@@ -16,7 +16,8 @@ final Set<PaletteAction> actionsMap = {
     title: "New Tab",
     description: "Create a new tab",
     icon: FluentIcons.add_12_regular,
-    shortcut: const SingleActivator(LogicalKeyboardKey.keyT, control: true),
+    shortcut:
+        LogicalKeySet(LogicalKeyboardKey.keyT, LogicalKeyboardKey.control),
     onInvoke: (context, ref) async {
       final terminal = ref.read(terminalProvider);
       final index = terminal.createTerminalTab();
@@ -26,7 +27,8 @@ final Set<PaletteAction> actionsMap = {
   PaletteAction(
     title: "Settings",
     icon: FluentIcons.settings_28_regular,
-    shortcut: const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+    shortcut:
+        LogicalKeySet(LogicalKeyboardKey.keyS, LogicalKeyboardKey.control),
     onInvoke: (context, ref) async {
       GoRouter.of(context).push("/settings");
     },
@@ -34,8 +36,11 @@ final Set<PaletteAction> actionsMap = {
   PaletteAction(
     title: "Copy",
     icon: FluentIcons.copy_16_regular,
-    shortcut: const SingleActivator(LogicalKeyboardKey.keyC,
-        control: true, shift: true),
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyC,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
     onInvoke: (context, ref) async {
       final terminal = ref.read(terminalProvider);
       final instance = terminal.terminalAt(terminal.activeIndex);
@@ -53,8 +58,11 @@ final Set<PaletteAction> actionsMap = {
   PaletteAction(
     title: "Paste",
     icon: FluentIcons.clipboard_paste_16_regular,
-    shortcut: const SingleActivator(LogicalKeyboardKey.keyV,
-        control: true, shift: true),
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyV,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
     onInvoke: (context, ref) async {
       final terminal = ref.read(terminalProvider);
       final instance = terminal.terminalAt(terminal.activeIndex);
@@ -91,93 +99,105 @@ class PaletteOverlay extends HookConsumerWidget {
       [text.value],
     );
 
-    return Dialog(
-      alignment: Alignment.topCenter,
-      backgroundColor: Colors.transparent,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(5),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * .7,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.grey[800]?.withOpacity(.3),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  autofocus: true,
-                  maxLines: 1,
-                  onChanged: (value) => text.value = value,
-                  decoration: InputDecoration(
-                    hintText: "Search any available commands",
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.grey[800]!,
-                        width: 2,
+    final focusNode = useFocusNode();
+
+    return CallbackShortcuts(
+      bindings: {
+        LogicalKeySet(LogicalKeyboardKey.escape): () {
+          Navigator.of(context).pop();
+        },
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): () {
+          focusNode.nextFocus();
+        },
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): () {
+          focusNode.previousFocus();
+        },
+      },
+      child: Dialog(
+        alignment: Alignment.topCenter,
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(5),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * .7,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.grey[800]?.withOpacity(.3),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    maxLines: 1,
+                    onChanged: (value) => text.value = value,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      hintText: "Search any available commands",
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey[800]!,
+                          width: 2,
+                        ),
                       ),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue,
-                        width: 2,
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.blue,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: ListView.builder(
-                      itemCount: filteredActions.length,
-                      itemBuilder: (context, index) {
-                        final action = filteredActions.elementAt(index);
-                        return ListTile(
-                          leading: Icon(action.icon),
-                          title: Text(action.title),
-                          dense: true,
-                          horizontalTitleGap: 0,
-                          subtitle: action.description != null
-                              ? Text(
-                                  action.description!,
-                                  style: Theme.of(context).textTheme.caption,
-                                )
-                              : null,
-                          trailing: action.shortcut != null
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ...action.shortcut!
-                                        .debugDescribeKeys()
-                                        .replaceAll("Key ", "")
-                                        .replaceAll("+ ", "")
-                                        .split(" ")
-                                        .map(
-                                          (key) => KeyboardKeyWidget(
-                                            keyboardKey: key,
-                                          ),
-                                        )
-                                  ],
-                                )
-                              : null,
-                          onTap: () async {
-                            await action.onInvoke(context, ref);
-                            if (action.closeAfterClick) {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        );
-                      },
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: ListView.builder(
+                        itemCount: filteredActions.length,
+                        itemBuilder: (context, index) {
+                          final action = filteredActions.elementAt(index);
+                          return ListTile(
+                            leading: Icon(action.icon),
+                            title: Text(action.title),
+                            dense: true,
+                            horizontalTitleGap: 0,
+                            subtitle: action.description != null
+                                ? Text(
+                                    action.description!,
+                                    style: Theme.of(context).textTheme.caption,
+                                  )
+                                : null,
+                            trailing: action.shortcut != null
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ...action.shortcut!.keys.map(
+                                        (key) => KeyboardKeyWidget(
+                                          keyboardKey: key.keyLabel,
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                : null,
+                            onTap: () async {
+                              await action.onInvoke(context, ref);
+                              if (action.closeAfterClick) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

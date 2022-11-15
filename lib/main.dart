@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -15,24 +17,46 @@ void main() async {
   await windowManager.ensureInitialized();
 
   const windowOptions = WindowOptions(
-    size: Size(700, 500),
-    minimumSize: Size(700, 500),
-    backgroundColor: Colors.transparent,
     titleBarStyle: TitleBarStyle.hidden,
     title: 'Wives',
+    minimumSize: Size(700, 400),
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
+    if (!Platform.isLinux) await windowManager.setHasShadow(true);
+    await windowManager.setResizable(true);
     await windowManager.show();
     await windowManager.focus();
   });
   runApp(const ProviderScope(child: Terminal()));
 }
 
-class Terminal extends HookConsumerWidget {
+class Terminal extends StatefulHookConsumerWidget {
   const Terminal({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<Terminal> createState() => _TerminalState();
+}
+
+class _TerminalState extends ConsumerState<Terminal> with WindowListener {
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowFocus() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final terminalTabScrollController = useAutoScrollController();
     final openPalette = usePaletteOverlay();
 
@@ -46,6 +70,9 @@ class Terminal extends HookConsumerWidget {
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       title: 'Terminal',
+      builder: (context, child) => DragToResizeArea(
+        child: child!,
+      ),
       darkTheme: ThemeData.dark().copyWith(
         backgroundColor: Colors.black,
         scaffoldBackgroundColor: Colors.transparent,
