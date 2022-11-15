@@ -168,10 +168,9 @@ class TerminalFrame extends HookConsumerWidget {
       appBar: appBar,
       body: terminal.instances.entries.mapIndexed((i, tab) {
         final isActive = i == activeIndex;
-        final controller = TerminalController();
         return TerminalView(
-          tab.value,
-          controller: controller,
+          tab.value.item1,
+          controller: tab.value.item2,
           padding: const EdgeInsets.all(5),
           autofocus: true,
           focusNode: tab.key,
@@ -196,8 +195,8 @@ class TerminalFrame extends HookConsumerWidget {
                   onTap: () {
                     Actions.of(context).invokeAction(
                         CopyPasteAction(),
-                        CopyPasteIntent(tab.value,
-                            controller: controller,
+                        CopyPasteIntent(tab.value.item1,
+                            controller: tab.value.item2,
                             intentType: CopyPasteIntentType.copy));
                   },
                   child: const ListTile(
@@ -214,16 +213,30 @@ class TerminalFrame extends HookConsumerWidget {
                   onTap: () {
                     Actions.of(context).invokeAction(
                         CopyPasteAction(),
-                        CopyPasteIntent(tab.value,
-                            controller: controller,
+                        CopyPasteIntent(tab.value.item1,
+                            controller: tab.value.item2,
                             intentType: CopyPasteIntentType.paste));
                   },
                   child: const ListTile(
                     dense: true,
                     horizontalTitleGap: 0,
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(FluentIcons.clipboard_16_regular),
+                    leading: Icon(FluentIcons.clipboard_paste_16_regular),
                     title: Text("Paste"),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "settings",
+                  height: 30,
+                  onTap: () {
+                    GoRouter.of(context).push("/settings");
+                  },
+                  child: const ListTile(
+                    dense: true,
+                    horizontalTitleGap: 0,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(FluentIcons.settings_16_regular),
+                    title: Text("Settings"),
                   ),
                 ),
               ],
@@ -236,18 +249,18 @@ class TerminalFrame extends HookConsumerWidget {
               control: true,
               shift: true,
             ): CopyPasteIntent(
-              tab.value,
+              tab.value.item1,
               intentType: CopyPasteIntentType.copy,
-              controller: controller,
+              controller: tab.value.item2,
             ),
             const SingleActivator(
               LogicalKeyboardKey.keyV,
               control: true,
               shift: true,
             ): CopyPasteIntent(
-              tab.value,
+              tab.value.item1,
               intentType: CopyPasteIntentType.paste,
-              controller: controller,
+              controller: tab.value.item2,
             ),
           },
         );

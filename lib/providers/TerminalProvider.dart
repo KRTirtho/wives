@@ -1,25 +1,29 @@
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tuple/tuple.dart';
 import 'package:wives/models/constants.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:xterm/xterm.dart';
 
 /// This class or provider holds all the information for all the terminals
 class Terminals extends ChangeNotifier {
-  Map<FocusNode, Terminal> instances;
+  Map<FocusNode, Tuple2<Terminal, TerminalController>> instances;
   int activeIndex;
   final Ref ref;
 
   PreferencesProvider get preferences => ref.read(preferencesProvider);
 
   Terminals(this.ref)
-      : instances = {FocusNode(): Constants.terminal()},
+      : instances = {
+          FocusNode(): Tuple2(Constants.terminal(), TerminalController())
+        },
         activeIndex = 0,
         super();
 
-  void addInstance(Terminal terminal, FocusNode focusNode) {
-    instances[focusNode] = terminal;
+  void addInstance(
+      Terminal terminal, TerminalController controller, FocusNode focusNode) {
+    instances[focusNode] = Tuple2(terminal, controller);
     notifyListeners();
   }
 
@@ -38,6 +42,7 @@ class Terminals extends ChangeNotifier {
     final focusNode = FocusNode();
     addInstance(
       Constants.terminal(shell ?? preferences.defaultShell),
+      TerminalController(),
       focusNode,
     );
 
@@ -68,7 +73,8 @@ class Terminals extends ChangeNotifier {
     terminalAt(activeIndex)?.key.requestFocus();
   }
 
-  MapEntry<FocusNode, Terminal>? terminalAt(int index) {
+  MapEntry<FocusNode, Tuple2<Terminal, TerminalController>>? terminalAt(
+      int index) {
     return instances.entries.toList()[index];
   }
 
