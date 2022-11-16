@@ -24,6 +24,7 @@ void main() async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     if (!Platform.isLinux) await windowManager.setHasShadow(true);
     await windowManager.setResizable(true);
+    await windowManager.setMinimumSize(const Size(700, 400));
     await windowManager.show();
     await windowManager.focus();
   });
