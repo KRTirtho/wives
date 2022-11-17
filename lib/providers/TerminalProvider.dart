@@ -1,14 +1,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:tuple/tuple.dart';
 import 'package:wives/models/constants.dart';
+import 'package:wives/models/terminal_group.dart';
+import 'package:wives/models/terminal_piece.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:xterm/xterm.dart';
 
 /// This class or provider holds all the information for all the terminals
 class Terminals extends ChangeNotifier {
-  Map<FocusNode, Tuple2<Terminal, TerminalController>> instances;
+  Map<FocusNode, TerminalGroup> instances;
   int activeIndex;
   final Ref ref;
 
@@ -16,14 +17,35 @@ class Terminals extends ChangeNotifier {
 
   Terminals(this.ref)
       : instances = {
-          FocusNode(): Tuple2(Constants.terminal(), TerminalController())
+          FocusNode(): TerminalGroup(horizontalTerminals: [TerminalPiece()])
         },
         activeIndex = 0,
         super();
 
-  void addInstance(
-      Terminal terminal, TerminalController controller, FocusNode focusNode) {
-    instances[focusNode] = Tuple2(terminal, controller);
+  void addGroupInstance(TerminalGroup terminalGroup, FocusNode focusNode) {
+    instances[focusNode] = terminalGroup;
+    notifyListeners();
+  }
+
+  void setGroupTerminals(
+    TerminalGroup group, {
+    List<TerminalPiece>? horizontalTerminals,
+    List<TerminalPiece>? verticalTerminals,
+  }) {
+    final originalGroup = instances.entries
+        .firstWhereOrNull(
+          (element) => element.value == group,
+        )
+        ?.key;
+    if (originalGroup == null) return;
+
+    if (horizontalTerminals != null) {
+      instances[originalGroup]?.horizontalTerminals = horizontalTerminals;
+    }
+
+    if (verticalTerminals != null) {
+      instances[originalGroup]?.verticalTerminals = verticalTerminals;
+    }
     notifyListeners();
   }
 
@@ -40,15 +62,24 @@ class Terminals extends ChangeNotifier {
 
   int createTerminalTab([String? shell]) {
     final focusNode = FocusNode();
-    addInstance(
-      Constants.terminal(shell ?? preferences.defaultShell),
-      TerminalController(),
+    final terminalFocusNode = FocusNode();
+    addGroupInstance(
+      TerminalGroup(
+        horizontalTerminals: [
+          TerminalPiece(
+            terminal: Constants.terminal(shell),
+            controller: TerminalController(),
+            focusNode: terminalFocusNode,
+          ),
+        ],
+      ),
       focusNode,
     );
 
     final index = instances.length - 1;
     setActiveIndex(index);
     focusNode.requestFocus();
+    terminalFocusNode.requestFocus();
     return index;
   }
 
@@ -62,9 +93,9 @@ class Terminals extends ChangeNotifier {
     terminalAt(activeIndex)?.key.requestFocus();
   }
 
-  void closeTerminalTabByInstance(Terminal terminal) {
+  void closeTerminalTabByInstance(TerminalGroup terminalGroup) {
     final node = instances.keys.firstWhereOrNull(
-      (key) => instances[key] == terminal,
+      (key) => instances[key] == terminalGroup,
     );
     if (instances.length <= 1 || node == null) return;
     // closes the Tab/Removes the tab by instance
@@ -73,8 +104,7 @@ class Terminals extends ChangeNotifier {
     terminalAt(activeIndex)?.key.requestFocus();
   }
 
-  MapEntry<FocusNode, Tuple2<Terminal, TerminalController>>? terminalAt(
-      int index) {
+  MapEntry<FocusNode, TerminalGroup>? terminalAt(int index) {
     return instances.entries.toList()[index];
   }
 
@@ -91,6 +121,8 @@ class Terminals extends ChangeNotifier {
     terminalAt(index)?.key.requestFocus();
     return index;
   }
+
+  TerminalGroup? get activeGroup => terminalAt(activeIndex)?.value;
 }
 
 final terminalProvider = ChangeNotifierProvider((ref) {

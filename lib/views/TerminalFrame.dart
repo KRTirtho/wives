@@ -11,6 +11,7 @@ import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
+import 'package:wives/views/Grouper.dart';
 import 'package:xterm/xterm.dart';
 import 'package:collection/collection.dart';
 
@@ -168,102 +169,105 @@ class TerminalFrame extends HookConsumerWidget {
       appBar: appBar,
       body: terminal.instances.entries.mapIndexed((i, tab) {
         final isActive = i == activeIndex;
-        return TerminalView(
-          tab.value.item1,
-          controller: tab.value.item2,
-          padding: const EdgeInsets.all(5),
-          autofocus: true,
-          focusNode: tab.key,
-          textStyle: TerminalStyle(
-            fontSize: preferences.fontSize,
-            fontFamily: "Cascadia Mono",
-          ),
-          onSecondaryTapDown: (info, cell) {
-            showMenu(
-              context: context,
-              position: RelativeRect.fromLTRB(
-                info.globalPosition.dx,
-                info.globalPosition.dy,
-                info.globalPosition.distance + info.globalPosition.dx,
-                info.globalPosition.distance + info.globalPosition.dy,
-              ),
-              elevation: 0,
-              items: [
-                PopupMenuItem(
-                  value: "copy",
-                  height: 30,
-                  onTap: () {
-                    Actions.of(context).invokeAction(
-                        CopyPasteAction(),
-                        CopyPasteIntent(tab.value.item1,
-                            controller: tab.value.item2,
-                            intentType: CopyPasteIntentType.copy));
-                  },
-                  child: const ListTile(
-                    dense: true,
-                    horizontalTitleGap: 0,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(FluentIcons.copy_16_regular),
-                    title: Text("Copy"),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: "paste",
-                  height: 30,
-                  onTap: () {
-                    Actions.of(context).invokeAction(
-                        CopyPasteAction(),
-                        CopyPasteIntent(tab.value.item1,
-                            controller: tab.value.item2,
-                            intentType: CopyPasteIntentType.paste));
-                  },
-                  child: const ListTile(
-                    dense: true,
-                    horizontalTitleGap: 0,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(FluentIcons.clipboard_paste_16_regular),
-                    title: Text("Paste"),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: "settings",
-                  height: 30,
-                  onTap: () {
-                    GoRouter.of(context).push("/settings");
-                  },
-                  child: const ListTile(
-                    dense: true,
-                    horizontalTitleGap: 0,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(FluentIcons.settings_16_regular),
-                    title: Text("Settings"),
-                  ),
-                ),
-              ],
-            );
-          },
-          shortcuts: {
-            if (isActive) ...shortcuts,
-            const SingleActivator(
-              LogicalKeyboardKey.keyC,
-              control: true,
-              shift: true,
-            ): CopyPasteIntent(
-              tab.value.item1,
-              intentType: CopyPasteIntentType.copy,
-              controller: tab.value.item2,
-            ),
-            const SingleActivator(
-              LogicalKeyboardKey.keyV,
-              control: true,
-              shift: true,
-            ): CopyPasteIntent(
-              tab.value.item1,
-              intentType: CopyPasteIntentType.paste,
-              controller: tab.value.item2,
-            ),
-          },
+        return Grouper(
+          terminal: tab.value.active,
         );
+        // return TerminalView(
+        //   tab.value.item1,
+        //   controller: tab.value.item2,
+        //   focusNode: tab.key,
+        //   padding: const EdgeInsets.all(5),
+        //   autofocus: true,
+        //   textStyle: TerminalStyle(
+        //     fontSize: preferences.fontSize,
+        //     fontFamily: "Cascadia Mono",
+        //   ),
+        //   onSecondaryTapDown: (info, cell) {
+        //     showMenu(
+        //       context: context,
+        //       position: RelativeRect.fromLTRB(
+        //         info.globalPosition.dx,
+        //         info.globalPosition.dy,
+        //         info.globalPosition.distance + info.globalPosition.dx,
+        //         info.globalPosition.distance + info.globalPosition.dy,
+        //       ),
+        //       elevation: 0,
+        //       items: [
+        //         PopupMenuItem(
+        //           value: "copy",
+        //           height: 30,
+        //           onTap: () {
+        //             Actions.of(context).invokeAction(
+        //                 CopyPasteAction(),
+        //                 CopyPasteIntent(tab.value.item1,
+        //                     controller: tab.value.item2,
+        //                     intentType: CopyPasteIntentType.copy));
+        //           },
+        //           child: const ListTile(
+        //             dense: true,
+        //             horizontalTitleGap: 0,
+        //             contentPadding: EdgeInsets.zero,
+        //             leading: Icon(FluentIcons.copy_16_regular),
+        //             title: Text("Copy"),
+        //           ),
+        //         ),
+        //         PopupMenuItem(
+        //           value: "paste",
+        //           height: 30,
+        //           onTap: () {
+        //             Actions.of(context).invokeAction(
+        //                 CopyPasteAction(),
+        //                 CopyPasteIntent(tab.value.item1,
+        //                     controller: tab.value.item2,
+        //                     intentType: CopyPasteIntentType.paste));
+        //           },
+        //           child: const ListTile(
+        //             dense: true,
+        //             horizontalTitleGap: 0,
+        //             contentPadding: EdgeInsets.zero,
+        //             leading: Icon(FluentIcons.clipboard_paste_16_regular),
+        //             title: Text("Paste"),
+        //           ),
+        //         ),
+        //         PopupMenuItem(
+        //           value: "settings",
+        //           height: 30,
+        //           onTap: () {
+        //             GoRouter.of(context).push("/settings");
+        //           },
+        //           child: const ListTile(
+        //             dense: true,
+        //             horizontalTitleGap: 0,
+        //             contentPadding: EdgeInsets.zero,
+        //             leading: Icon(FluentIcons.settings_16_regular),
+        //             title: Text("Settings"),
+        //           ),
+        //         ),
+        //       ],
+        //     );
+        //   },
+        //   shortcuts: {
+        //     if (isActive) ...shortcuts,
+        //     const SingleActivator(
+        //       LogicalKeyboardKey.keyC,
+        //       control: true,
+        //       shift: true,
+        //     ): CopyPasteIntent(
+        //       tab.value.item1,
+        //       intentType: CopyPasteIntentType.copy,
+        //       controller: tab.value.item2,
+        //     ),
+        //     const SingleActivator(
+        //       LogicalKeyboardKey.keyV,
+        //       control: true,
+        //       shift: true,
+        //     ): CopyPasteIntent(
+        //       tab.value.item1,
+        //       intentType: CopyPasteIntentType.paste,
+        //       controller: tab.value.item2,
+        //     ),
+        //   },
+        // );
       }).toList()[activeIndex],
     );
   }

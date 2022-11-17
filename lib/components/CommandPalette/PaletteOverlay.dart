@@ -73,8 +73,8 @@ final Set<PaletteAction> actionsMap = {
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.item1,
-          controller: instance.value.item2,
+          instance.value.active.terminal,
+          controller: instance.value.active.controller,
           intentType: CopyPasteIntentType.copy,
         ),
       );
@@ -95,8 +95,8 @@ final Set<PaletteAction> actionsMap = {
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.item1,
-          controller: instance.value.item2,
+          instance.value.active.terminal,
+          controller: instance.value.active.controller,
           intentType: CopyPasteIntentType.paste,
         ),
       );
