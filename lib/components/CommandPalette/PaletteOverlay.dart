@@ -17,11 +17,69 @@ final Set<PaletteAction> actionsMap = {
     title: "New Tab",
     description: "Create a new tab",
     icon: FluentIcons.add_12_regular,
-    shortcut:
-        LogicalKeySet(LogicalKeyboardKey.keyT, LogicalKeyboardKey.control),
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyT,
+      LogicalKeyboardKey.control,
+    ),
     onInvoke: (context, ref) async {
       final terminal = ref.read(TerminalTree.provider);
       terminal.createNewTerminalTab();
+    },
+  ),
+  PaletteAction(
+    title: "Close Tab",
+    description: "Close currently focused tab",
+    icon: FluentIcons.calendar_cancel_16_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyW,
+      LogicalKeyboardKey.control,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.closeTerminalTab();
+    },
+  ),
+  PaletteAction(
+    title: "Split Vertically",
+    description: "Vertically split currently focused terminal",
+    icon: FluentIcons.split_vertical_12_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.focused?.split(TerminalAxis.column);
+    },
+  ),
+  PaletteAction(
+    title: "Split Horizontally",
+    description: "Horizontally split currently focused terminal",
+    icon: FluentIcons.split_horizontal_12_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.focused?.split(TerminalAxis.row);
+    },
+  ),
+  PaletteAction(
+    title: "Close Split Terminal",
+    description: "Close focused terminal in the split view",
+    icon: Icons.close,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyW,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      final parent = terminal.focused?.parent;
+      parent?.removeChild(terminal.focused!);
     },
   ),
   PaletteAction(
@@ -67,7 +125,7 @@ final Set<PaletteAction> actionsMap = {
     ),
     onInvoke: (context, ref) async {
       final terminal = ref.read(TerminalTree.provider);
-      final node = terminal.active;
+      final node = terminal.focused;
       if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),
@@ -89,7 +147,7 @@ final Set<PaletteAction> actionsMap = {
     ),
     onInvoke: (context, ref) async {
       final terminal = ref.read(TerminalTree.provider);
-      final node = terminal.active;
+      final node = terminal.focused;
       if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),

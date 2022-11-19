@@ -118,6 +118,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       actions: {
         ...WidgetsApp.defaultActions,
         TabIntent: TabAction(),
+        SplitViewIntent: SplitViewAction(),
         NavigationIntent: NavigationAction(),
         FontAdjustmentIntent: FontAdjustmentAction(),
         CopyPasteIntent: CopyPasteAction(),

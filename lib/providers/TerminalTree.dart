@@ -30,11 +30,11 @@ class TerminalNode {
   bool get isRoot => parent == null;
 
   /// Custom property to separate all the children that are "not in" the group of the parent
-  List<TerminalNode>? get obedientChildren =>
+  List<TerminalNode> get obedientChildren =>
       children.where((child) => child.parentAxis == axis).toList();
 
   /// Custom property to separate all the children that are "in" the group of the parent
-  List<TerminalNode>? get disobedientChildren =>
+  List<TerminalNode> get disobedientChildren =>
       children.where((child) => child.parentAxis != axis).toList();
 
   TerminalNode? parent;
@@ -61,27 +61,27 @@ class TerminalNode {
         assert((parent == null && parentAxis == null) ||
             (parent != null && parentAxis != null));
 
-  void addChild(TerminalNode node) {
-    if (node.parent != this) {
+  void addChild(TerminalNode child) {
+    if (child.parent != this) {
       throw Exception("Can't add other parent's child to this node");
     }
-    _children.add(node);
+    _children.add(child);
     updateTree();
   }
 
-  void removeChild(TerminalNode node) {
-    if (node.parent != this) {
+  void removeChild(TerminalNode child) {
+    if (child.parent != this) {
       throw Exception("Can't remove other parent's child from this node");
     }
-    if (!node.isLeaf) {
-      for (var child in node.children) {
-        child.parent = this;
-        child.parentAxis = axis;
-        addChild(child);
+    if (!child.isLeaf) {
+      for (var d2Child in child.children) {
+        d2Child.parent = this;
+        d2Child.parentAxis = axis;
+        addChild(d2Child);
       }
     }
-    node.dispose();
-    _children.remove(node);
+    child.dispose();
+    _children.remove(child);
 
     updateTree();
   }
@@ -95,14 +95,14 @@ class TerminalNode {
     if (isLeaf) {
       this.axis = axis;
     }
-    addChild(
-      TerminalNode(
-        updateTree: updateTree,
-        parentAxis: axis,
-        parent: this,
-      ),
+    final node = TerminalNode(
+      updateTree: updateTree,
+      parentAxis: axis,
+      parent: this,
     );
+    addChild(node);
     updateTree();
+    node.focusNode.requestFocus();
   }
 
   void dispose() {
@@ -121,6 +121,8 @@ class TerminalTree with ChangeNotifier {
   final Set<TerminalNode> _nodes;
 
   List<TerminalNode> get nodes => _nodes.toList();
+
+  TerminalNode? focused;
 
   TerminalNode? active;
   int? get activeIndex => active != null ? nodes.indexOf(active!) : null;
@@ -181,5 +183,10 @@ class TerminalTree with ChangeNotifier {
       active = node;
       notifyListeners();
     }
+  }
+
+  void setFocused(TerminalNode node) {
+    focused = node;
+    notifyListeners();
   }
 }

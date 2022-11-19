@@ -8,7 +8,6 @@ import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/models/intents.dart';
-import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalTree.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +24,6 @@ class TerminalFrame extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final shells = NativeUtils.getShells();
     final terminalTree = ref.watch(TerminalTree.provider);
-    final preferences = ref.watch(preferencesProvider);
 
     final activeRoot = terminalTree.active;
     final activeRootIndex = terminalTree.activeIndex;

@@ -30,7 +30,7 @@ class Grouper extends HookConsumerWidget {
     useEffect(() {
       listener() {
         if (node.focusNode.hasFocus) {
-          // grouperNode.setActive(node);
+          ref.read(TerminalTree.provider).setFocused(node);
         }
       }
 
@@ -108,7 +108,7 @@ class Grouper extends HookConsumerWidget {
             axis: invertedAxis,
             children: [
               defaultBody,
-              ...node.disobedientChildren!.map(
+              ...node.disobedientChildren.map(
                 (childNode) => Grouper(
                   node: childNode,
                   onSecondaryTapDown: onSecondaryTapDown,
@@ -120,7 +120,7 @@ class Grouper extends HookConsumerWidget {
               ),
             ],
           ),
-          ...?node.obedientChildren?.map(
+          ...node.obedientChildren.map(
             (childNode) {
               return Grouper(
                 node: childNode,
