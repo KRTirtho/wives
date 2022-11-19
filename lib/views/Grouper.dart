@@ -4,37 +4,41 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:wives/components/CompactIconButton.dart';
-import 'package:wives/hooks/useId.dart';
-import 'package:wives/models/terminal_piece.dart';
-import 'package:wives/providers/GrouperProvider.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
+import 'package:wives/providers/TerminalTree.dart';
+import 'package:xterm/core.dart';
 import 'package:xterm/ui.dart';
-import 'package:tuple/tuple.dart';
 
 class Grouper extends HookConsumerWidget {
-  final TerminalPiece terminal;
+  final TerminalNode node;
   final VoidCallback? onClose;
-  final String? parent;
+  final void Function(TapDownDetails details, CellOffset offset)?
+      onSecondaryTapDown;
+  final Map<ShortcutActivator, Intent>? shortcuts;
   const Grouper({
-    required this.terminal,
+    required this.node,
     this.onClose,
-    this.parent,
+    this.onSecondaryTapDown,
+    this.shortcuts,
     super.key,
   });
 
   @override
   Widget build(BuildContext context, ref) {
-    final nodeId = useId();
-    final param = Tuple2(nodeId, parent);
-    final grouperNode = ref.watch(grouperNodeProvider(param));
     final preferences = ref.watch(preferencesProvider);
 
     useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(grouperNodeSkeletonProvider).addNode(param);
-      });
-      return null;
-    }, [param]);
+      listener() {
+        if (node.focusNode.hasFocus) {
+          // grouperNode.setActive(node);
+        }
+      }
+
+      node.focusNode.addListener(listener);
+      return () {
+        node.focusNode.removeListener(listener);
+      };
+    }, [node.focusNode]);
 
     final defaultBody = Scaffold(
       appBar: PreferredSize(
@@ -47,12 +51,16 @@ class Grouper extends HookConsumerWidget {
               children: [
                 const SizedBox(width: 4),
                 CompactIconButton(
-                  onPressed: grouperNode.splitHorizontally,
+                  onPressed: () {
+                    node.split(TerminalAxis.row);
+                  },
                   child: const Icon(FluentIcons.split_horizontal_12_regular),
                 ),
                 const SizedBox(width: 4),
                 CompactIconButton(
-                  onPressed: grouperNode.splitVertically,
+                  onPressed: () {
+                    node.split(TerminalAxis.column);
+                  },
                   child: const Icon(FluentIcons.split_vertical_12_regular),
                 ),
                 const Spacer(),
@@ -67,15 +75,24 @@ class Grouper extends HookConsumerWidget {
         ),
       ),
       body: TerminalView(
-        terminal.terminal,
+        node.terminal,
         padding: const EdgeInsets.all(5),
         autofocus: true,
+        focusNode: node.focusNode,
+        controller: node.controller,
         textStyle: TerminalStyle(
           fontSize: preferences.fontSize,
           fontFamily: "Cascadia Mono",
         ),
+        onSecondaryTapDown: onSecondaryTapDown,
+        shortcuts: shortcuts,
       ),
     );
+
+    final invertedAxis =
+        node.axis == TerminalAxis.row ? TerminalAxis.column : TerminalAxis.row;
+
+    if (node.isLeaf) return defaultBody;
 
     return MultiSplitViewTheme(
       data: MultiSplitViewThemeData(
@@ -85,34 +102,35 @@ class Grouper extends HookConsumerWidget {
         ),
       ),
       child: MultiSplitView(
-        axis: grouperNode.direction ?? Axis.horizontal,
+        axis: node.axis,
         children: [
-          if (grouperNode.innerGroup == null &&
-              grouperNode.innerDirection == null)
-            defaultBody
-          else
-            MultiSplitView(
-              axis: grouperNode.innerDirection ?? Axis.horizontal,
-              children: [
-                defaultBody,
-                ...?grouperNode.innerGroup?.map(
-                  (e) => Grouper(
-                    terminal: e,
-                    parent: nodeId,
-                    onClose: () {
-                      grouperNode.removeInnerGroupTerminal(e);
-                    },
-                  ),
+          MultiSplitView(
+            axis: invertedAxis,
+            children: [
+              defaultBody,
+              ...node.disobedientChildren!.map(
+                (childNode) => Grouper(
+                  node: childNode,
+                  onSecondaryTapDown: onSecondaryTapDown,
+                  shortcuts: shortcuts,
+                  onClose: () {
+                    node.removeChild(childNode);
+                  },
                 ),
-              ],
-            ),
-          ...?grouperNode.group?.map(
-            (e) => Grouper(
-                terminal: e,
-                parent: nodeId,
+              ),
+            ],
+          ),
+          ...?node.obedientChildren?.map(
+            (childNode) {
+              return Grouper(
+                node: childNode,
+                onSecondaryTapDown: onSecondaryTapDown,
+                shortcuts: shortcuts,
                 onClose: () {
-                  grouperNode.removeGroupTerminal(e);
-                }),
+                  node.removeChild(childNode);
+                },
+              );
+            },
           ),
         ],
       ),

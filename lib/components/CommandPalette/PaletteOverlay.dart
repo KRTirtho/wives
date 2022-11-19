@@ -10,7 +10,7 @@ import 'package:wives/components/KeyboardKey.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/models/palette_actions.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
-import 'package:wives/providers/TerminalProvider.dart';
+import 'package:wives/providers/TerminalTree.dart';
 
 final Set<PaletteAction> actionsMap = {
   PaletteAction(
@@ -20,9 +20,8 @@ final Set<PaletteAction> actionsMap = {
     shortcut:
         LogicalKeySet(LogicalKeyboardKey.keyT, LogicalKeyboardKey.control),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final index = terminal.createTerminalTab();
-      terminal.terminalAt(index)?.key.requestFocus();
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.createNewTerminalTab();
     },
   ),
   PaletteAction(
@@ -67,14 +66,14 @@ final Set<PaletteAction> actionsMap = {
       LogicalKeyboardKey.shift,
     ),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final instance = terminal.terminalAt(terminal.activeIndex);
-      if (instance == null) return;
+      final terminal = ref.read(TerminalTree.provider);
+      final node = terminal.active;
+      if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.active.terminal,
-          controller: instance.value.active.controller,
+          node.terminal,
+          controller: node.controller,
           intentType: CopyPasteIntentType.copy,
         ),
       );
@@ -89,14 +88,14 @@ final Set<PaletteAction> actionsMap = {
       LogicalKeyboardKey.shift,
     ),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final instance = terminal.terminalAt(terminal.activeIndex);
-      if (instance == null) return;
+      final terminal = ref.read(TerminalTree.provider);
+      final node = terminal.active;
+      if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.active.terminal,
-          controller: instance.value.active.controller,
+          node.terminal,
+          controller: node.controller,
           intentType: CopyPasteIntentType.paste,
         ),
       );
