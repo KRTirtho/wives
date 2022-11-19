@@ -60,6 +60,47 @@ Map<SingleActivator, Intent> useTabShortcuts(
               ref: ref,
               intentType: TabIntentType.cycleForward,
             ),
+            const SingleActivator(
+              LogicalKeyboardKey.tab,
+              control: true,
+              shift: true,
+            ): TabIntent(
+              controller: scrollController,
+              ref: ref,
+              intentType: TabIntentType.cycleBackward,
+            ),
+            const SingleActivator(
+              LogicalKeyboardKey.arrowDown,
+              control: true,
+              shift: true,
+            ): SplitViewIntent(
+              ref: ref,
+              intentType: SplitViewIntentType.splitHorizontal,
+            ),
+            const SingleActivator(
+              LogicalKeyboardKey.arrowRight,
+              control: true,
+              shift: true,
+            ): SplitViewIntent(
+              ref: ref,
+              intentType: SplitViewIntentType.splitVertical,
+            ),
+            const SingleActivator(
+              LogicalKeyboardKey.keyW,
+              control: true,
+              shift: true,
+            ): SplitViewIntent(
+              ref: ref,
+              intentType: SplitViewIntentType.close,
+            ),
+            const SingleActivator(
+              LogicalKeyboardKey.tab,
+              control: true,
+              alt: true,
+            ): SplitViewIntent(
+              ref: ref,
+              intentType: SplitViewIntentType.focusNext,
+            ),
             ...entries,
           },
       [ref, scrollController, entries]);

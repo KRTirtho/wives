@@ -24,6 +24,7 @@ dependencies:
   multi_split_view: ^2.1.0
   go_router: ^5.1.6
   tuple: ^2.0.1
+  nanoid: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1

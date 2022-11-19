@@ -9,7 +9,6 @@ import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/models/intents.dart';
-import 'package:wives/providers/TerminalProvider.dart';
 import 'package:wives/routes.dart';
 
 void main() async {
@@ -52,9 +51,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
   }
 
   @override
-  void onWindowFocus() {
-    setState(() {});
-  }
+  void onWindowFocus() {}
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +60,6 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
 
     useEffect(() {
       router.go("/", extra: terminalTabScrollController);
-      ref.read(terminalProvider).terminalAt(0)?.key.requestFocus();
       return null;
     }, []);
 
@@ -122,6 +118,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       actions: {
         ...WidgetsApp.defaultActions,
         TabIntent: TabAction(),
+        SplitViewIntent: SplitViewAction(),
         NavigationIntent: NavigationAction(),
         FontAdjustmentIntent: FontAdjustmentAction(),
         CopyPasteIntent: CopyPasteAction(),

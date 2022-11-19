@@ -10,19 +10,76 @@ import 'package:wives/components/KeyboardKey.dart';
 import 'package:wives/models/intents.dart';
 import 'package:wives/models/palette_actions.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
-import 'package:wives/providers/TerminalProvider.dart';
+import 'package:wives/providers/TerminalTree.dart';
 
 final Set<PaletteAction> actionsMap = {
   PaletteAction(
     title: "New Tab",
     description: "Create a new tab",
     icon: FluentIcons.add_12_regular,
-    shortcut:
-        LogicalKeySet(LogicalKeyboardKey.keyT, LogicalKeyboardKey.control),
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyT,
+      LogicalKeyboardKey.control,
+    ),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final index = terminal.createTerminalTab();
-      terminal.terminalAt(index)?.key.requestFocus();
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.createNewTerminalTab();
+    },
+  ),
+  PaletteAction(
+    title: "Close Tab",
+    description: "Close currently focused tab",
+    icon: FluentIcons.calendar_cancel_16_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyW,
+      LogicalKeyboardKey.control,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.closeTerminalTab();
+    },
+  ),
+  PaletteAction(
+    title: "Split Vertically",
+    description: "Vertically split currently focused terminal",
+    icon: FluentIcons.split_vertical_12_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.focused?.split(TerminalAxis.column);
+    },
+  ),
+  PaletteAction(
+    title: "Split Horizontally",
+    description: "Horizontally split currently focused terminal",
+    icon: FluentIcons.split_horizontal_12_regular,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      terminal.focused?.split(TerminalAxis.row);
+    },
+  ),
+  PaletteAction(
+    title: "Close Split Terminal",
+    description: "Close focused terminal in the split view",
+    icon: Icons.close,
+    shortcut: LogicalKeySet(
+      LogicalKeyboardKey.keyW,
+      LogicalKeyboardKey.control,
+      LogicalKeyboardKey.shift,
+    ),
+    onInvoke: (context, ref) async {
+      final terminal = ref.read(TerminalTree.provider);
+      final parent = terminal.focused?.parent;
+      parent?.removeChild(terminal.focused!);
     },
   ),
   PaletteAction(
@@ -67,14 +124,14 @@ final Set<PaletteAction> actionsMap = {
       LogicalKeyboardKey.shift,
     ),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final instance = terminal.terminalAt(terminal.activeIndex);
-      if (instance == null) return;
+      final terminal = ref.read(TerminalTree.provider);
+      final node = terminal.focused;
+      if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.item1,
-          controller: instance.value.item2,
+          node.terminal,
+          controller: node.controller,
           intentType: CopyPasteIntentType.copy,
         ),
       );
@@ -89,14 +146,14 @@ final Set<PaletteAction> actionsMap = {
       LogicalKeyboardKey.shift,
     ),
     onInvoke: (context, ref) async {
-      final terminal = ref.read(terminalProvider);
-      final instance = terminal.terminalAt(terminal.activeIndex);
-      if (instance == null) return;
+      final terminal = ref.read(TerminalTree.provider);
+      final node = terminal.focused;
+      if (node == null) return;
       Actions.of(context).invokeAction(
         CopyPasteAction(),
         CopyPasteIntent(
-          instance.value.item1,
-          controller: instance.value.item2,
+          node.terminal,
+          controller: node.controller,
           intentType: CopyPasteIntentType.paste,
         ),
       );
