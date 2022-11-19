@@ -91,13 +91,14 @@ class TerminalNode {
     updateTree();
   }
 
-  void split(Axis axis) {
+  void split(Axis axis, [String? shell]) {
     if (isLeaf) {
       this.axis = axis;
     }
     final node = TerminalNode(
       updateTree: updateTree,
       parentAxis: axis,
+      terminal: Constants.terminal(shell),
       parent: this,
     );
     addChild(node);

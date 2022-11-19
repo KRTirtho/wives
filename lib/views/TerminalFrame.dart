@@ -11,7 +11,7 @@ import 'package:wives/models/intents.dart';
 import 'package:wives/providers/TerminalTree.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
-import 'package:wives/views/Grouper.dart';
+import 'package:wives/components/TerminalSplitGroup.dart';
 
 class TerminalFrame extends HookConsumerWidget {
   final AutoScrollController scrollController;
@@ -175,7 +175,7 @@ class TerminalFrame extends HookConsumerWidget {
       body: terminalTree.nodes.isNotEmpty && activeRootIndex != null
           ? terminalTree.nodes.map((tab) {
               final isActive = activeRoot == tab;
-              return Grouper(
+              return TerminalSplitGroup(
                 node: tab,
                 onSecondaryTapDown: (info, cell) {
                   showMenu(

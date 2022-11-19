@@ -9,13 +9,13 @@ import 'package:wives/providers/TerminalTree.dart';
 import 'package:xterm/core.dart';
 import 'package:xterm/ui.dart';
 
-class Grouper extends HookConsumerWidget {
+class TerminalSplitGroup extends HookConsumerWidget {
   final TerminalNode node;
   final VoidCallback? onClose;
   final void Function(TapDownDetails details, CellOffset offset)?
       onSecondaryTapDown;
   final Map<ShortcutActivator, Intent>? shortcuts;
-  const Grouper({
+  const TerminalSplitGroup({
     required this.node,
     this.onClose,
     this.onSecondaryTapDown,
@@ -40,53 +40,56 @@ class Grouper extends HookConsumerWidget {
       };
     }, [node.focusNode]);
 
-    final defaultBody = Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(30),
-        child: Material(
-          color: Colors.grey[850],
+    final defaultBody = Stack(
+      children: [
+        TerminalView(
+          node.terminal,
+          padding: const EdgeInsets.all(5),
+          autofocus: true,
+          focusNode: node.focusNode,
+          controller: node.controller,
+          textStyle: TerminalStyle(
+            fontSize: preferences.fontSize,
+            fontFamily: "Cascadia Mono",
+          ),
+          onSecondaryTapDown: onSecondaryTapDown,
+          shortcuts: shortcuts,
+        ),
+        Material(
+          type: MaterialType.transparency,
           child: IconTheme(
             data: const IconThemeData(size: 18, color: Colors.white),
-            child: Row(
-              children: [
-                const SizedBox(width: 4),
-                CompactIconButton(
-                  onPressed: () {
-                    node.split(TerminalAxis.row);
-                  },
-                  child: const Icon(FluentIcons.split_horizontal_12_regular),
-                ),
-                const SizedBox(width: 4),
-                CompactIconButton(
-                  onPressed: () {
-                    node.split(TerminalAxis.column);
-                  },
-                  child: const Icon(FluentIcons.split_vertical_12_regular),
-                ),
-                const Spacer(),
-                if (onClose != null)
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5, right: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
                   CompactIconButton(
-                    onPressed: onClose,
-                    child: const Icon(Icons.close_sharp),
+                    onPressed: () {
+                      node.split(TerminalAxis.row);
+                    },
+                    child: const Icon(FluentIcons.split_horizontal_12_regular),
                   ),
-              ],
+                  const SizedBox(width: 5),
+                  CompactIconButton(
+                    onPressed: () {
+                      node.split(TerminalAxis.column);
+                    },
+                    child: const Icon(FluentIcons.split_vertical_12_regular),
+                  ),
+                  if (onClose != null) ...[
+                    const SizedBox(width: 5),
+                    CompactIconButton(
+                      onPressed: onClose,
+                      child: const Icon(Icons.close_sharp),
+                    )
+                  ]
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      body: TerminalView(
-        node.terminal,
-        padding: const EdgeInsets.all(5),
-        autofocus: true,
-        focusNode: node.focusNode,
-        controller: node.controller,
-        textStyle: TerminalStyle(
-          fontSize: preferences.fontSize,
-          fontFamily: "Cascadia Mono",
-        ),
-        onSecondaryTapDown: onSecondaryTapDown,
-        shortcuts: shortcuts,
-      ),
+      ],
     );
 
     final invertedAxis =
@@ -96,7 +99,7 @@ class Grouper extends HookConsumerWidget {
 
     return MultiSplitViewTheme(
       data: MultiSplitViewThemeData(
-        dividerThickness: 2,
+        dividerThickness: 1,
         dividerPainter: DividerPainter(
           backgroundColor: Colors.grey[700],
         ),
@@ -109,7 +112,7 @@ class Grouper extends HookConsumerWidget {
             children: [
               defaultBody,
               ...node.disobedientChildren.map(
-                (childNode) => Grouper(
+                (childNode) => TerminalSplitGroup(
                   node: childNode,
                   onSecondaryTapDown: onSecondaryTapDown,
                   shortcuts: shortcuts,
@@ -122,7 +125,7 @@ class Grouper extends HookConsumerWidget {
           ),
           ...node.obedientChildren.map(
             (childNode) {
-              return Grouper(
+              return TerminalSplitGroup(
                 node: childNode,
                 onSecondaryTapDown: onSecondaryTapDown,
                 shortcuts: shortcuts,
