@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -7,7 +9,9 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
+import 'package:wives/main.dart';
 import 'package:wives/models/intents.dart';
+import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalTree.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
@@ -43,8 +47,13 @@ class TerminalFrame extends HookConsumerWidget {
     final shortcuts = useTabShortcuts(ref, scrollController);
 
     useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        terminalTree.createNewTerminalTab();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        /// This is an exception for creating terminal tab with default shell
+        /// Because this tab gets created before [PreferencesProvider] is initialized
+        terminalTree.createNewTerminalTab(
+          (await localStorage).getString('defaultShell'),
+          (await localStorage).getString('defaultWorkingDirectory'),
+        );
       });
       return null;
     }, []);
@@ -52,119 +61,212 @@ class TerminalFrame extends HookConsumerWidget {
     final appBar = WindowTitleBar(
       nonDraggableLeading: Scrollbar(
         controller: scrollController,
-        child: ListView.builder(
-          controller: scrollController,
+        child: ReorderableListView.builder(
+          onReorder: (oldIndex, newIndex) {
+            terminalTree.reorderTerminalTabs(oldIndex, newIndex);
+          },
           scrollDirection: Axis.horizontal,
+          scrollController: scrollController,
           shrinkWrap: true,
-          itemCount: terminalTree.nodes.length + 1,
-          itemBuilder: (context, i) {
-            if (terminalTree.nodes.length == i) {
-              return Center(
-                child: Row(
-                  children: [
-                    const SizedBox(width: 5),
-                    CompactIconButton(
-                      onPressed: createNewTab,
-                      child: const Icon(Icons.add_rounded),
+          itemCount: terminalTree.nodes.length,
+          buildDefaultDragHandles: false,
+          proxyDecorator: (child, index, animation) {
+            return Material(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.background,
+                    width: Tween<double>(begin: 0, end: 2).transform(
+                      animation.value,
                     ),
-                    PopupMenuButton<String>(
-                      position: PopupMenuPosition.under,
-                      onSelected: (value) {
-                        if (value == "settings") {
-                          GoRouter.of(context).push("/settings");
-                        } else {
-                          createNewTab(value);
-                        }
-                      },
-                      onCanceled: activeRoot?.focusNode.requestFocus,
-                      offset: const Offset(0, 10),
-                      tooltip: "Shells",
-                      color: Colors.black,
-                      itemBuilder: (context) {
-                        return [
-                          ...shells
-                              .map((shell) => PopupMenuItem(
-                                    height: 30,
-                                    value: shell,
-                                    child: ListTile(
-                                      dense: true,
-                                      horizontalTitleGap: 0,
-                                      contentPadding: EdgeInsets.zero,
-                                      leading:
-                                          const Icon(Icons.terminal_rounded),
-                                      title: Text(shell),
-                                    ),
-                                  ))
-                              .toList(),
-                          const PopupMenuItem(
-                            height: 30,
-                            value: "settings",
-                            child: ListTile(
-                              dense: true,
-                              horizontalTitleGap: 0,
-                              contentPadding: EdgeInsets.zero,
-                              leading: Icon(Icons.settings_outlined),
-                              title: Text("Settings"),
-                            ),
-                          )
-                        ];
-                      },
-                      child: const Icon(Icons.keyboard_arrow_down_rounded),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final tab = "Terminal $i";
-            final rootNode = terminalTree.nodes[i];
-            return AutoScrollTag(
-              controller: scrollController,
-              index: i,
-              key: ValueKey(i),
-              child: InkWell(
-                onTap: activeRoot != rootNode
-                    ? () {
-                        terminalTree.setActiveRoot(rootNode);
-                        scrollController.scrollToIndex(
-                          i,
-                          preferPosition: AutoScrollPosition.end,
-                        );
-                      }
-                    : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 100),
-                  margin: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: activeRoot == terminalTree.nodes[i]
-                        ? Colors.grey[800]
-                        : null,
-                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
+                ),
+                child: child,
+              ),
+            );
+          },
+          footer: Center(
+            child: Row(
+              children: [
+                const SizedBox(width: 5),
+                CompactIconButton(
+                  onPressed: createNewTab,
+                  child: const Icon(Icons.add_rounded),
+                ),
+                PopupMenuButton<String>(
+                  position: PopupMenuPosition.under,
+                  onSelected: (value) {
+                    if (value == "settings") {
+                      GoRouter.of(context).push("/settings");
+                    } else {
+                      createNewTab(value);
+                    }
+                  },
+                  onCanceled: activeRoot?.focusNode.requestFocus,
+                  offset: const Offset(0, 10),
+                  tooltip: "Shells",
+                  color: Colors.black,
+                  itemBuilder: (context) {
+                    return [
+                      ...shells
+                          .map((shell) => PopupMenuItem(
+                                height: 30,
+                                value: shell,
+                                child: ListTile(
+                                  dense: true,
+                                  horizontalTitleGap: 0,
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: const Icon(Icons.terminal_rounded),
+                                  title: Text(shell),
+                                ),
+                              ))
+                          .toList(),
+                      const PopupMenuItem(
+                        height: 30,
+                        value: "settings",
+                        child: ListTile(
+                          dense: true,
+                          horizontalTitleGap: 0,
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.settings_outlined),
+                          title: Text("Settings"),
                         ),
-                        child: Row(children: [
-                          Text(tab),
-                          const SizedBox(width: 5),
-                          CompactIconButton(
-                            child: const Icon(
-                              Icons.close_rounded,
-                              size: 15,
+                      )
+                    ];
+                  },
+                  child: const Icon(Icons.keyboard_arrow_down_rounded),
+                ),
+              ],
+            ),
+          ),
+          itemBuilder: (context, i) {
+            return HookBuilder(
+              key: ValueKey(terminalTree.nodes[i]),
+              builder: (context) {
+                final rootNode = terminalTree.nodes[i];
+                final title = ref.watch(preferencesProvider.select(
+                      (value) => value.defaultWorkingDirectory,
+                    )) ??
+                    Platform.environment['HOME'] ??
+                    Platform.environment['USERPROFILE'];
+
+                final controller = useTextEditingController(text: title);
+                final isEditing = useState(false);
+                final focusNode = useFocusNode();
+
+                useEffect(() {
+                  focusNode.addListener(() {
+                    if (!focusNode.hasFocus) {
+                      isEditing.value = false;
+                    }
+                  });
+                  return;
+                }, []);
+
+                return AutoScrollTag(
+                  controller: scrollController,
+                  index: i,
+                  key: ValueKey(terminalTree.nodes[i]),
+                  child: InkWell(
+                    onTap: activeRoot != rootNode && !isEditing.value
+                        ? () {
+                            terminalTree.setActiveRoot(rootNode);
+                            scrollController.scrollToIndex(
+                              i,
+                              preferPosition: AutoScrollPosition.end,
+                            );
+                            rootNode.focusNode.requestFocus();
+                          }
+                        : null,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 100),
+                      margin: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: activeRoot == terminalTree.nodes[i]
+                            ? Colors.grey[800]
+                            : null,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                          width: 150,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
                             ),
-                            onPressed: () => closeTab(i),
-                          )
-                        ]),
+                            child: ReorderableDragStartListener(
+                              index: i,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isEditing.value)
+                                    SizedBox(
+                                      width: 110,
+                                      child: EditableText(
+                                        backgroundCursorColor: Colors.white,
+                                        cursorColor: Colors.white,
+                                        selectionColor:
+                                            Colors.blue.withAlpha(70),
+                                        focusNode: focusNode,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                        onEditingComplete: () {
+                                          isEditing.value = false;
+                                          terminalTree.focused?.focusNode
+                                              .requestFocus();
+                                        },
+                                        scrollBehavior:
+                                            ScrollConfiguration.of(context)
+                                                .copyWith(scrollbars: false),
+                                        controller: controller,
+                                      ),
+                                    )
+                                  else
+                                    Flexible(
+                                      child: Tooltip(
+                                        message: controller.text,
+                                        child: GestureDetector(
+                                          onTap: rootNode == terminalTree.active
+                                              ? () {
+                                                  isEditing.value = true;
+                                                  focusNode.requestFocus();
+                                                }
+                                              : null,
+                                          child: Text(
+                                            controller.text,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 5),
+                                  CompactIconButton(
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      size: 15,
+                                    ),
+                                    onPressed: () => closeTab(i),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           },
         ),

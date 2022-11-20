@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:wives/models/constants.dart';
+import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:xterm/core.dart';
 import 'package:xterm/ui.dart';
 
@@ -42,21 +43,21 @@ class TerminalNode {
   /// When Terminal is split in Grouper, it's assigned to allow deciding the axis of the child
   Axis? parentAxis;
 
-  /// For notifying the tree for any changes
+  final Ref ref;
   final VoidCallback updateTree;
 
-  TerminalNode({
+  TerminalNode(
+    this.ref, {
+    required this.terminal,
     required this.updateTree,
     this.parent,
     this.parentAxis,
     this.axis = TerminalAxis.row,
     List<TerminalNode>? children,
-    Terminal? terminal,
     TerminalController? controller,
     FocusNode? focusNode,
   })  : controller = controller ?? TerminalController(),
         _children = children?.toSet() ?? {},
-        terminal = terminal ?? Constants.terminal(),
         focusNode = focusNode ?? FocusNode(),
         assert((parent == null && parentAxis == null) ||
             (parent != null && parentAxis != null));
@@ -96,9 +97,13 @@ class TerminalNode {
       this.axis = axis;
     }
     final node = TerminalNode(
-      updateTree: updateTree,
+      ref,
       parentAxis: axis,
-      terminal: Constants.terminal(shell),
+      updateTree: updateTree,
+      terminal: Constants.terminal(
+        shell ?? ref.read(preferencesProvider).defaultShell,
+        ref.read(preferencesProvider).defaultWorkingDirectory,
+      ),
       parent: this,
     );
     addChild(node);
@@ -119,7 +124,7 @@ class TerminalTree with ChangeNotifier {
 
   static final provider = ChangeNotifierProvider((ref) => TerminalTree(ref));
 
-  final Set<TerminalNode> _nodes;
+  Set<TerminalNode> _nodes;
 
   List<TerminalNode> get nodes => _nodes.toList();
 
@@ -144,10 +149,15 @@ class TerminalTree with ChangeNotifier {
     notifyListeners();
   }
 
-  TerminalNode createNewTerminalTab([String? shell]) {
+  TerminalNode createNewTerminalTab([String? shell, String? workingDirectory]) {
     final node = TerminalNode(
+      ref,
       updateTree: notifyListeners,
-      terminal: Constants.terminal(shell),
+      terminal: Constants.terminal(
+        shell ?? ref.read(preferencesProvider).defaultShell,
+        workingDirectory ??
+            ref.read(preferencesProvider).defaultWorkingDirectory,
+      ),
     );
     addNode(node);
     active = node;
@@ -177,6 +187,20 @@ class TerminalTree with ChangeNotifier {
     setActiveRoot(nodes.elementAt(index));
     active?.focusNode.requestFocus();
     return index;
+  }
+
+  void reorderTerminalTabs(int oldIndex, int newIndex) {
+    final nodes = List<TerminalNode>.from(this.nodes);
+    if (newIndex >= nodes.length - 1) {
+      newIndex = nodes.length - 1;
+    }
+    final node = nodes.removeAt(oldIndex);
+    nodes.insert(newIndex, node);
+
+    _nodes = nodes.toSet();
+    active = node;
+    node.focusNode.requestFocus();
+    notifyListeners();
   }
 
   void setActiveRoot(TerminalNode node) {

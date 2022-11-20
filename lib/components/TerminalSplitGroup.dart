@@ -69,24 +69,34 @@ class TerminalSplitGroup extends HookConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  CompactIconButton(
-                    onPressed: () {
-                      node.split(TerminalAxis.row);
-                    },
-                    child: const Icon(FluentIcons.split_horizontal_12_regular),
+                  Tooltip(
+                    message: "Split Terminal Horizontally",
+                    child: CompactIconButton(
+                      onPressed: () {
+                        node.split(TerminalAxis.row);
+                      },
+                      child:
+                          const Icon(FluentIcons.split_horizontal_12_regular),
+                    ),
                   ),
                   const SizedBox(width: 5),
-                  CompactIconButton(
-                    onPressed: () {
-                      node.split(TerminalAxis.column);
-                    },
-                    child: const Icon(FluentIcons.split_vertical_12_regular),
+                  Tooltip(
+                    message: "Split Terminal Vertically",
+                    child: CompactIconButton(
+                      onPressed: () {
+                        node.split(TerminalAxis.column);
+                      },
+                      child: const Icon(FluentIcons.split_vertical_12_regular),
+                    ),
                   ),
                   if (onClose != null) ...[
                     const SizedBox(width: 5),
-                    CompactIconButton(
-                      onPressed: onClose,
-                      child: const Icon(Icons.close_sharp),
+                    Tooltip(
+                      message: "Close this Sub-Terminal",
+                      child: CompactIconButton(
+                        onPressed: onClose,
+                        child: const Icon(Icons.close_sharp),
+                      ),
                     )
                   ]
                 ],
