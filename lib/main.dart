@@ -70,11 +70,8 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
   void onWindowResize() async {
     final store = await localStorage;
     final size = await windowManager.getSize();
-    if (await windowManager.isMaximized()) {
-      store.setBool(CacheKeys.windowMaximized, true);
-    } else {
-      store.setString(CacheKeys.windowSize, jsonEncode(size.toJson()));
-    }
+    store.setBool(CacheKeys.windowMaximized, await windowManager.isMaximized());
+    store.setString(CacheKeys.windowSize, jsonEncode(size.toJson()));
   }
 
   @override

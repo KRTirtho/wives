@@ -5,10 +5,11 @@ import 'package:wives/services/native.dart';
 import 'package:xterm/xterm.dart';
 
 class Constants {
-  static Terminal terminal([String? shell]) {
+  static Terminal terminal([String? shell, String? workingDirectory]) {
     final terminal = Terminal();
     final pty = Pty.start(
       shell ?? NativeUtils.getShells().last,
+      workingDirectory: workingDirectory,
       columns: terminal.viewWidth,
       rows: terminal.viewHeight,
       environment: {'TERM': 'xterm-256color'},
