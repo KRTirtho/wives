@@ -191,11 +191,15 @@ class TerminalTree with ChangeNotifier {
 
   void reorderTerminalTabs(int oldIndex, int newIndex) {
     final nodes = List<TerminalNode>.from(this.nodes);
-    if (newIndex >= nodes.length - 1) {
+    TerminalNode node;
+    if (newIndex > nodes.length - 1) {
       newIndex = nodes.length - 1;
+      node = nodes.removeAt(oldIndex);
+      nodes.insert(newIndex, node);
+    } else {
+      node = nodes.removeAt(oldIndex);
+      nodes.insert(newIndex <= oldIndex ? newIndex : newIndex - 1, node);
     }
-    final node = nodes.removeAt(oldIndex);
-    nodes.insert(newIndex, node);
 
     _nodes = nodes.toSet();
     active = node;
