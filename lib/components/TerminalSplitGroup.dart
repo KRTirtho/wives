@@ -12,7 +12,8 @@ import 'package:xterm/ui.dart';
 class TerminalSplitGroup extends HookConsumerWidget {
   final TerminalNode node;
   final VoidCallback? onClose;
-  final void Function(TapDownDetails details, CellOffset offset)?
+  final void Function(
+          TerminalNode node, TapDownDetails details, CellOffset offset)?
       onSecondaryTapDown;
   final Map<ShortcutActivator, Intent>? shortcuts;
   const TerminalSplitGroup({
@@ -52,7 +53,11 @@ class TerminalSplitGroup extends HookConsumerWidget {
             fontSize: preferences.fontSize,
             fontFamily: "Cascadia Mono",
           ),
-          onSecondaryTapDown: onSecondaryTapDown,
+          onTapUp: (p0, p1) {
+            node.focusNode.requestFocus();
+          },
+          onSecondaryTapDown: (details, cellOffset) =>
+              onSecondaryTapDown?.call(node, details, cellOffset),
           shortcuts: shortcuts,
         ),
         Material(

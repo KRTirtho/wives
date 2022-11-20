@@ -177,7 +177,7 @@ class TerminalFrame extends HookConsumerWidget {
               final isActive = activeRoot == tab;
               return TerminalSplitGroup(
                 node: tab,
-                onSecondaryTapDown: (info, cell) {
+                onSecondaryTapDown: (activeNode, info, cell) {
                   showMenu(
                     context: context,
                     position: RelativeRect.fromLTRB(
@@ -193,10 +193,13 @@ class TerminalFrame extends HookConsumerWidget {
                         height: 30,
                         onTap: () {
                           Actions.of(context).invokeAction(
-                              CopyPasteAction(),
-                              CopyPasteIntent(tab.terminal,
-                                  controller: tab.controller,
-                                  intentType: CopyPasteIntentType.copy));
+                            CopyPasteAction(),
+                            CopyPasteIntent(
+                              activeNode.terminal,
+                              controller: activeNode.controller,
+                              intentType: CopyPasteIntentType.copy,
+                            ),
+                          );
                         },
                         child: const ListTile(
                           dense: true,
@@ -211,10 +214,13 @@ class TerminalFrame extends HookConsumerWidget {
                         height: 30,
                         onTap: () {
                           Actions.of(context).invokeAction(
-                              CopyPasteAction(),
-                              CopyPasteIntent(tab.terminal,
-                                  controller: tab.controller,
-                                  intentType: CopyPasteIntentType.paste));
+                            CopyPasteAction(),
+                            CopyPasteIntent(
+                              activeNode.terminal,
+                              controller: activeNode.controller,
+                              intentType: CopyPasteIntentType.paste,
+                            ),
+                          );
                         },
                         child: const ListTile(
                           dense: true,

@@ -122,7 +122,7 @@ class CopyPasteAction extends Action<CopyPasteIntent> {
     final tab = intent.terminal;
     final data = await Clipboard.getData("text/plain");
     if (data?.text != null && data!.text!.isNotEmpty) {
-      tab.write(data.text!);
+      tab.paste(data.text!);
     }
   }
 
