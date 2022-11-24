@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:wives/providers/PreferencesProvider.dart';
+import 'package:wives/providers/preferences_provider.dart';
 
 class FontAdjustmentIntent extends Intent {
   final WidgetRef ref;

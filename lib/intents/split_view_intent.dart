@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:wives/providers/TerminalTree.dart';
+import 'package:wives/providers/terminal_tree.dart';
 
 enum SplitViewIntentType {
   splitHorizontal,

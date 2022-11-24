@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:wives/providers/TerminalTree.dart';
+import 'package:wives/providers/terminal_tree.dart';
 import 'package:xterm/core.dart';
 import 'package:xterm/src/ui/input_map.dart';
 

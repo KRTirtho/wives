@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:wives/components/CommandPalette/PaletteOverlay.dart';
+import 'package:wives/components/CommandPalette/palette_overlay.dart';
 import 'package:wives/routes.dart';
 
 void Function() usePaletteOverlay() {

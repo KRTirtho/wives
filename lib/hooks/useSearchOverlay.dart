@@ -1,15 +1,16 @@
+// TODO: implement Search for Terminal
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:wives/components/CompactIconButton.dart';
-import 'package:xterm/terminal/terminal_search.dart';
+import 'package:wives/components/compact_icon_button.dart';
 
 class SearchOverlay extends HookWidget {
   final void Function()? onClose;
   final void Function(String searchString)? onSearch;
-  final void Function(TerminalSearchOptions options)? onUpdateSearchOptions;
+  final void Function(Object options)? onUpdateSearchOptions;
   final FocusNode focusNode;
   SearchOverlay({
     this.onClose,
@@ -27,11 +28,11 @@ class SearchOverlay extends HookWidget {
     final useRegex = useState(false);
 
     updateOptions() {
-      onUpdateSearchOptions?.call(TerminalSearchOptions(
-        caseSensitive: showUpperCase.value,
-        matchWholeWord: matchWholeWords.value,
-        useRegex: useRegex.value,
-      ));
+      // onUpdateSearchOptions?.call(TerminalSearchOptions(
+      //   caseSensitive: showUpperCase.value,
+      //   matchWholeWord: matchWholeWords.value,
+      //   useRegex: useRegex.value,
+      // ));
     }
 
     useEffect(() {
@@ -114,7 +115,7 @@ void useSearchOverlay(
   bool isOpen, {
   void Function()? onClose,
   void Function(String searchString)? onSearch,
-  void Function(TerminalSearchOptions options)? onUpdateSearchOptions,
+  void Function(Object options)? onUpdateSearchOptions,
 }) {
   final context = useContext();
   final focusNode = useFocusNode();

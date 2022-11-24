@@ -6,16 +6,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:wives/components/CompactIconButton.dart';
-import 'package:wives/components/WindowTitleBar.dart';
+import 'package:wives/components/compact_icon_button.dart';
+import 'package:wives/components/window_title_bar.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/main.dart';
 import 'package:wives/intents/intents.dart';
-import 'package:wives/providers/PreferencesProvider.dart';
-import 'package:wives/providers/TerminalTree.dart';
+import 'package:wives/providers/preferences_provider.dart';
+import 'package:wives/providers/terminal_tree.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
-import 'package:wives/components/TerminalSplitGroup.dart';
+import 'package:wives/components/terminal_split_group.dart';
 
 class TerminalFrame extends HookConsumerWidget {
   final AutoScrollController scrollController;

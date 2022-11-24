@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:wives/views/TerminalFrame.dart';
-import 'package:wives/views/TerminalSettings.dart';
+import 'package:wives/views/terminal_frame.dart';
+import 'package:wives/views/terminal_settings.dart';
 
 final routerKey = GlobalKey<NavigatorState>();
 final router = GoRouter(

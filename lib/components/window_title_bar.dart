@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:wives/components/PlatformTitleButtons.dart';
+import 'package:wives/components/platform_titlebar_buttons.dart';
 
 class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? leading;

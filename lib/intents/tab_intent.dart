@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:wives/providers/TerminalTree.dart';
+import 'package:wives/providers/terminal_tree.dart';
 import 'package:wives/routes.dart';
 
 enum TabIntentType {
