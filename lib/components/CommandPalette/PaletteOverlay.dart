@@ -12,7 +12,7 @@ import 'package:wives/models/palette_actions.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalTree.dart';
 
-final Set<PaletteAction> actionsMap = {
+final Iterable<PaletteAction> actionsMap = [
   PaletteAction(
     title: "New Tab",
     description: "Create a new tab",
@@ -159,7 +159,9 @@ final Set<PaletteAction> actionsMap = {
       );
     },
   ),
-};
+]
+  ..sort((a, b) => a.title.compareTo(b.title))
+  ..toSet();
 
 const _specialLKeys = [
   LogicalKeyboardKey.tab,
