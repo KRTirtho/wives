@@ -12,7 +12,7 @@ import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/hooks/usePaletteOverlay.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/models/cache_keys.dart';
-import 'package:wives/models/intents.dart';
+import 'package:wives/intents/intents.dart';
 import 'package:wives/routes.dart';
 
 Future<SharedPreferences> get localStorage => SharedPreferences.getInstance();

@@ -10,7 +10,7 @@ import 'package:wives/components/CompactIconButton.dart';
 import 'package:wives/components/WindowTitleBar.dart';
 import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/main.dart';
-import 'package:wives/models/intents.dart';
+import 'package:wives/intents/intents.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalTree.dart';
 import 'package:wives/services/native.dart';

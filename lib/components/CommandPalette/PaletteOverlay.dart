@@ -7,7 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:wives/components/KeyboardKey.dart';
-import 'package:wives/models/intents.dart';
+import 'package:wives/intents/intents.dart';
 import 'package:wives/models/palette_actions.dart';
 import 'package:wives/providers/PreferencesProvider.dart';
 import 'package:wives/providers/TerminalTree.dart';
