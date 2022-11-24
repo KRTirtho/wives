@@ -369,6 +369,30 @@ class TerminalFrame extends HookConsumerWidget {
                     intentType: CopyPasteIntentType.paste,
                     controller: tab.controller,
                   ),
+                  const SingleActivator(
+                    LogicalKeyboardKey.arrowRight,
+                    shift: true,
+                  ): CursorSelectorIntent(
+                    tab,
+                    direction: CursorSelectorType.selectRight,
+                  ),
+                  const SingleActivator(
+                    LogicalKeyboardKey.arrowLeft,
+                    shift: true,
+                  ): CursorSelectorIntent(
+                    tab,
+                    direction: CursorSelectorType.selectLeft,
+                  ),
+                  const SingleActivator(LogicalKeyboardKey.arrowLeft):
+                      CursorSelectorIntent(
+                    tab,
+                    direction: CursorSelectorType.clearLeft,
+                  ),
+                  const SingleActivator(LogicalKeyboardKey.arrowRight):
+                      CursorSelectorIntent(
+                    tab,
+                    direction: CursorSelectorType.clearRight,
+                  ),
                 },
               );
             }).toList()[activeRootIndex]

@@ -142,6 +142,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
         SplitViewIntent: SplitViewAction(),
         NavigationIntent: NavigationAction(),
         FontAdjustmentIntent: FontAdjustmentAction(),
+        CursorSelectorIntent: CursorSelectorAction(),
         CopyPasteIntent: CopyPasteAction(),
         PaletteIntent: CallbackAction(
           onInvoke: (intent) => openPalette(),
