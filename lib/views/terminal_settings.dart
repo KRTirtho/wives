@@ -46,6 +46,23 @@ class TerminalSettings extends HookConsumerWidget {
             ),
           ),
           ListTile(
+            title: const Text("Font family"),
+            trailing: DropdownButton<String>(
+              value: preferences.fontFamily,
+              items: fontFamilies
+                  .map(
+                    (fontFamily) => DropdownMenuItem(
+                      value: fontFamily,
+                      child: Text(fontFamily),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (fontFamily) {
+                if (fontFamily != null) preferences.setFontFamily(fontFamily);
+              },
+            ),
+          ),
+          ListTile(
             title: const Text("Default Shell"),
             trailing: DropdownButton<String>(
               value: preferences.defaultShell,
