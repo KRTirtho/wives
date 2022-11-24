@@ -25,36 +25,30 @@ class WindowTitleBar extends StatefulWidget implements PreferredSizeWidget {
 class _WindowTitleBarState extends State<WindowTitleBar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.grey[800]),
-      child: Container(
-        decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
-        child: Material(
-          type: MaterialType.transparency,
-          child: SizedBox(
-            height: 45,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (widget.nonDraggableLeading != null)
-                  widget.nonDraggableLeading!,
-                Expanded(
-                  child: DragToMoveArea(
-                    child: widget.leading ?? const Text(""),
-                  ),
-                ),
-                if (widget.center != null)
-                  DragToMoveArea(
-                    child: widget.center!,
-                  ),
-                DragToMoveArea(
-                  child: Platform.isWindows
-                      ? const WindowsTitleButtons()
-                      : const LinuxTitleButtons(),
-                ),
-              ],
+    return Material(
+      type: MaterialType.canvas,
+      color: Theme.of(context).backgroundColor,
+      child: SizedBox(
+        height: 45,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (widget.nonDraggableLeading != null) widget.nonDraggableLeading!,
+            Expanded(
+              child: DragToMoveArea(
+                child: widget.leading ?? const Text(""),
+              ),
             ),
-          ),
+            if (widget.center != null)
+              DragToMoveArea(
+                child: widget.center!,
+              ),
+            DragToMoveArea(
+              child: Platform.isWindows
+                  ? const WindowsTitleButtons()
+                  : const LinuxTitleButtons(),
+            ),
+          ],
         ),
       ),
     );

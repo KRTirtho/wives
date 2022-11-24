@@ -58,34 +58,59 @@ class TerminalFrame extends HookConsumerWidget {
       return null;
     }, []);
 
+    final calculatedWidth = 160 * (terminalTree.nodes.length + 1);
+    final viewPortWidth = MediaQuery.of(context).size.width;
+
     final appBar = WindowTitleBar(
-      nonDraggableLeading: Scrollbar(
-        controller: scrollController,
-        child: ReorderableListView.builder(
-          onReorder: (oldIndex, newIndex) {
-            terminalTree.reorderTerminalTabs(oldIndex, newIndex);
-          },
-          scrollDirection: Axis.horizontal,
-          scrollController: scrollController,
-          shrinkWrap: true,
-          itemCount: terminalTree.nodes.length,
-          buildDefaultDragHandles: false,
-          proxyDecorator: (child, index, animation) {
-            return Material(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.background,
-                    width: Tween<double>(begin: 0, end: 2).transform(
-                      animation.value,
+      nonDraggableLeading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: (calculatedWidth > viewPortWidth
+                    ? viewPortWidth
+                    : calculatedWidth) -
+                150,
+            child: Scrollbar(
+              controller: scrollController,
+              child: ReorderableListView.builder(
+                onReorder: terminalTree.reorderTerminalTabs,
+                scrollDirection: Axis.horizontal,
+                scrollController: scrollController,
+                shrinkWrap: true,
+                itemCount: terminalTree.nodes.length,
+                buildDefaultDragHandles: false,
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.background,
+                          width: Tween<double>(begin: 0, end: 2).transform(
+                            animation.value,
+                          ),
+                        ),
+                      ),
+                      child: child,
                     ),
-                  ),
-                ),
-                child: child,
+                  );
+                },
+                itemBuilder: (context, i) {
+                  return AutoScrollTag(
+                    controller: scrollController,
+                    index: i,
+                    key: ValueKey(terminalTree.nodes[i]),
+                    child: TabbarTab(
+                      index: i,
+                      onClose: () => closeTab(i),
+                      node: terminalTree.nodes[i],
+                      scrollController: scrollController,
+                    ),
+                  );
+                },
               ),
-            );
-          },
-          footer: Center(
+            ),
+          ),
+          Center(
             child: Row(
               children: [
                 const SizedBox(width: 5),
@@ -138,138 +163,8 @@ class TerminalFrame extends HookConsumerWidget {
                 ),
               ],
             ),
-          ),
-          itemBuilder: (context, i) {
-            return HookBuilder(
-              key: ValueKey(terminalTree.nodes[i]),
-              builder: (context) {
-                final rootNode = terminalTree.nodes[i];
-                final title = ref.watch(preferencesProvider.select(
-                      (value) => value.defaultWorkingDirectory,
-                    )) ??
-                    Platform.environment['HOME'] ??
-                    Platform.environment['USERPROFILE'];
-
-                final controller = useTextEditingController(text: title);
-                final isEditing = useState(false);
-                final focusNode = useFocusNode();
-
-                useEffect(() {
-                  focusNode.addListener(() {
-                    if (!focusNode.hasFocus) {
-                      isEditing.value = false;
-                    }
-                  });
-                  return;
-                }, []);
-
-                return AutoScrollTag(
-                  controller: scrollController,
-                  index: i,
-                  key: ValueKey(terminalTree.nodes[i]),
-                  child: InkWell(
-                    onTap: activeRoot != rootNode && !isEditing.value
-                        ? () {
-                            terminalTree.setActiveRoot(rootNode);
-                            scrollController.scrollToIndex(
-                              i,
-                              preferPosition: AutoScrollPosition.end,
-                            );
-                            rootNode.focusNode.requestFocus();
-                          }
-                        : null,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 100),
-                      margin: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: activeRoot == terminalTree.nodes[i]
-                            ? Colors.grey[800]
-                            : null,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Material(
-                        type: MaterialType.transparency,
-                        child: Container(
-                          width: 150,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                            ),
-                            child: ReorderableDragStartListener(
-                              index: i,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (isEditing.value)
-                                    SizedBox(
-                                      width: 110,
-                                      child: EditableText(
-                                        backgroundCursorColor: Colors.white,
-                                        cursorColor: Colors.white,
-                                        selectionColor:
-                                            Colors.blue.withAlpha(70),
-                                        focusNode: focusNode,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                        ),
-                                        onEditingComplete: () {
-                                          isEditing.value = false;
-                                          terminalTree.focused?.focusNode
-                                              .requestFocus();
-                                        },
-                                        scrollBehavior:
-                                            ScrollConfiguration.of(context)
-                                                .copyWith(scrollbars: false),
-                                        controller: controller,
-                                      ),
-                                    )
-                                  else
-                                    Flexible(
-                                      child: Tooltip(
-                                        message: controller.text,
-                                        child: GestureDetector(
-                                          onTap: rootNode == terminalTree.active
-                                              ? () {
-                                                  isEditing.value = true;
-                                                  focusNode.requestFocus();
-                                                }
-                                              : null,
-                                          child: Text(
-                                            controller.text,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  const SizedBox(width: 5),
-                                  CompactIconButton(
-                                    child: const Icon(
-                                      Icons.close_rounded,
-                                      size: 15,
-                                    ),
-                                    onPressed: () => closeTab(i),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+          )
+        ],
       ),
     );
     return Scaffold(
@@ -397,6 +292,137 @@ class TerminalFrame extends HookConsumerWidget {
               );
             }).toList()[activeRootIndex]
           : Container(),
+    );
+  }
+}
+
+class TabbarTab extends HookConsumerWidget {
+  final int index;
+  final TerminalNode node;
+  final AutoScrollController scrollController;
+  final VoidCallback onClose;
+  const TabbarTab({
+    Key? key,
+    required this.index,
+    required this.onClose,
+    required this.node,
+    required this.scrollController,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final terminalTree = ref.watch(TerminalTree.provider);
+    final activeRoot = terminalTree.active;
+    final title = ref.watch(preferencesProvider.select(
+          (value) => value.defaultWorkingDirectory,
+        )) ??
+        Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'];
+
+    final controller = useTextEditingController(text: title);
+    final isEditing = useState(false);
+    final focusNode = useFocusNode();
+
+    useEffect(() {
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          isEditing.value = false;
+        }
+      });
+      return;
+    }, []);
+
+    return InkWell(
+      onTap: activeRoot != node && !isEditing.value
+          ? () {
+              terminalTree.setActiveRoot(node);
+              scrollController.scrollToIndex(
+                index,
+                preferPosition: AutoScrollPosition.end,
+              );
+              node.focusNode.requestFocus();
+            }
+          : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: activeRoot == node ? Colors.grey[800] : null,
+          borderRadius: BorderRadius.circular(2),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            width: 150,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8.0,
+              ),
+              child: ReorderableDragStartListener(
+                index: index,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isEditing.value)
+                      SizedBox(
+                        width: 110,
+                        child: EditableText(
+                          backgroundCursorColor: Colors.white,
+                          cursorColor: Colors.white,
+                          selectionColor: Colors.blue.withAlpha(70),
+                          focusNode: focusNode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          onEditingComplete: () {
+                            isEditing.value = false;
+                            terminalTree.focused?.focusNode.requestFocus();
+                          },
+                          scrollBehavior: ScrollConfiguration.of(context)
+                              .copyWith(scrollbars: false),
+                          controller: controller,
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: Tooltip(
+                          message: controller.text,
+                          child: GestureDetector(
+                            onTap: node == terminalTree.active
+                                ? () {
+                                    isEditing.value = true;
+                                    focusNode.requestFocus();
+                                  }
+                                : null,
+                            child: Text(
+                              controller.text,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(width: 5),
+                    CompactIconButton(
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 15,
+                      ),
+                      onPressed: onClose,
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
