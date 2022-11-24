@@ -51,7 +51,7 @@ class TerminalSplitGroup extends HookConsumerWidget {
           controller: node.controller,
           textStyle: TerminalStyle(
             fontSize: preferences.fontSize,
-            fontFamily: "Cascadia Mono",
+            fontFamily: "Jetbrains Mono",
           ),
           onTapUp: (p0, p1) {
             node.focusNode.requestFocus();
