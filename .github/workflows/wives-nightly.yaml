@@ -54,12 +54,9 @@ jobs:
           name: Wives-Macos-Bundle
           path: |
             dist/wives-macos-universal.dmg
-      - name: Setup upterm session
+      - name: Setup tmate session
         if: ${{ failure() }}
-        uses: lhotari/action-upterm@v1
-        with:
-          limit-access-to-actor: true
-
+        uses: mxschmitt/action-tmate@v3
 
   windows:
     runs-on: windows-latest
