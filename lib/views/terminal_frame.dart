@@ -356,9 +356,7 @@ class TabbarTab extends HookConsumerWidget {
             width: 150,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 8.0,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: ReorderableDragStartListener(
                 index: index,
                 child: Row(
@@ -410,11 +408,11 @@ class TabbarTab extends HookConsumerWidget {
                       ),
                     const SizedBox(width: 5),
                     CompactIconButton(
+                      onPressed: onClose,
                       child: const Icon(
                         Icons.close_rounded,
                         size: 15,
                       ),
-                      onPressed: onClose,
                     )
                   ],
                 ),

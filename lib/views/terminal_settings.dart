@@ -53,7 +53,10 @@ class TerminalSettings extends HookConsumerWidget {
                   .map(
                     (fontFamily) => DropdownMenuItem(
                       value: fontFamily,
-                      child: Text(fontFamily),
+                      child: Text(
+                        fontFamily,
+                        style: TextStyle(fontFamily: fontFamily),
+                      ),
                     ),
                   )
                   .toList(),
