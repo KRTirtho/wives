@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/animation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:xterm/ui.dart';
+import 'package:wives/extensions/color.dart';
 
 extension HexColor on Color {
   static Color fromHex(String hexString) {
@@ -134,7 +135,9 @@ final themesProvider = FutureProvider<Map<String, TerminalTheme>>(
             );
           }) ??
           [],
-    );
+    )..removeWhere((key, value) {
+        return value.background.isLight && value.foreground.isDark;
+      });
     return {
       "Default": TerminalThemes.defaultTheme,
       "White On Black": TerminalThemes.whiteOnBlack,

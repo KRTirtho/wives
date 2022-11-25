@@ -97,20 +97,8 @@ class PaletteOverlay extends HookConsumerWidget {
                       maxLines: 1,
                       onChanged: (value) => text.value = value,
                       textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: "Search any available commands",
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey[800]!,
-                            width: 2,
-                          ),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.blue,
-                            width: 2,
-                          ),
-                        ),
                       ),
                     ),
                     const SizedBox(height: 10),

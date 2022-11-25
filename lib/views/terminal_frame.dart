@@ -8,6 +8,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/compact_icon_button.dart';
 import 'package:wives/components/window_title_bar.dart';
 import 'package:wives/main.dart';
+import 'package:wives/extensions/color.dart';
 import 'package:wives/providers/preferences_provider.dart';
 import 'package:wives/providers/shortcuts_provider.dart';
 import 'package:wives/providers/terminal_tree.dart';
@@ -125,7 +126,6 @@ class TerminalFrame extends HookConsumerWidget {
                   onCanceled: activeRoot?.focusNode.requestFocus,
                   offset: const Offset(0, 10),
                   tooltip: "Shells",
-                  color: Colors.black,
                   itemBuilder: (context) {
                     return [
                       ...shells
@@ -178,7 +178,6 @@ class TerminalFrame extends HookConsumerWidget {
                       info.globalPosition.distance + info.globalPosition.dx,
                       info.globalPosition.distance + info.globalPosition.dy,
                     ),
-                    elevation: 0,
                     items: [
                       const PopupMenuItem(
                         value: "Copy",
@@ -266,6 +265,9 @@ class TabbarTab extends HookConsumerWidget {
       return;
     }, []);
 
+    final theme = ref
+        .watch(preferencesProvider.select((value) => value.defaultTheme.value));
+
     return InkWell(
       onTap: activeRoot != node && !isEditing.value
           ? () {
@@ -281,7 +283,11 @@ class TabbarTab extends HookConsumerWidget {
         duration: const Duration(milliseconds: 100),
         margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: activeRoot == node ? Colors.grey[800] : null,
+          color: activeRoot == node
+              ? theme.background.isDark
+                  ? theme.background.lighten()
+                  : theme.background.darken()
+              : null,
           borderRadius: BorderRadius.circular(2),
         ),
         child: Material(
@@ -303,7 +309,8 @@ class TabbarTab extends HookConsumerWidget {
                         child: EditableText(
                           backgroundCursorColor: Colors.white,
                           cursorColor: Colors.white,
-                          selectionColor: Colors.blue.withAlpha(70),
+                          selectionColor:
+                              Theme.of(context).primaryColor.withOpacity(0.8),
                           focusNode: focusNode,
                           style: const TextStyle(
                             color: Colors.white,

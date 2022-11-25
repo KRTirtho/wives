@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:wives/extensions/size.dart';
+import 'package:wives/extensions/color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:wives/hooks/useAutoScrollController.dart';
 import 'package:wives/models/cache_keys.dart';
+import 'package:wives/providers/preferences_provider.dart';
 import 'package:wives/providers/shortcuts_provider.dart';
 import 'package:wives/routes.dart';
 
@@ -81,6 +81,13 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       ),
     );
 
+    final theme =
+        ref.watch(preferencesProvider.select((s) => s.defaultTheme.value));
+
+    final background = theme.background.isDark
+        ? theme.background.darken()
+        : theme.background.lighten();
+
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
@@ -89,21 +96,36 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
         child: child!,
       ),
       darkTheme: ThemeData.dark().copyWith(
-        backgroundColor: Colors.black,
+        backgroundColor: background,
+        primaryColor: theme.blue,
         scaffoldBackgroundColor: Colors.transparent,
+        canvasColor: background,
+        dialogBackgroundColor: background,
+        popupMenuTheme: PopupMenuThemeData(
+          color: background,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
         splashFactory: NoSplash.splashFactory,
         buttonTheme: ButtonThemeData(
           hoverColor: Colors.grey.withOpacity(0.2),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.blue,
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
           isDense: true,
-          border: OutlineInputBorder(
+          border: const OutlineInputBorder(
             borderSide: BorderSide(
               color: Colors.grey,
               width: 2,
             ),
           ),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(
               color: Colors.grey,
               width: 2,
@@ -111,7 +133,7 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(
-              color: Colors.blue,
+              color: theme.blue,
               width: 2,
             ),
           ),

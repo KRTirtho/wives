@@ -119,7 +119,7 @@ class TerminalSplitGroup extends HookConsumerWidget {
       data: MultiSplitViewThemeData(
         dividerThickness: 1,
         dividerPainter: DividerPainter(
-          backgroundColor: Colors.grey[700],
+          backgroundColor: Theme.of(context).dividerColor,
         ),
       ),
       child: MultiSplitView(

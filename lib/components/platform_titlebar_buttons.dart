@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:wives/extensions/color.dart';
+import 'package:wives/providers/preferences_provider.dart';
 
 class WindowsTitleButtons extends StatelessWidget {
   const WindowsTitleButtons({Key? key}) : super(key: key);
@@ -49,11 +52,14 @@ class WindowsTitleButtons extends StatelessWidget {
   }
 }
 
-class LinuxTitleButtons extends StatelessWidget {
+class LinuxTitleButtons extends ConsumerWidget {
   const LinuxTitleButtons({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final theme =
+        ref.watch(preferencesProvider.select((p) => p.defaultTheme.value));
+
     return ElevatedButtonTheme(
       data: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -61,7 +67,9 @@ class LinuxTitleButtons extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           maximumSize: const Size(30, 30),
           minimumSize: const Size(30, 30),
-          backgroundColor: Colors.grey[800],
+          backgroundColor: theme.background.isDark
+              ? theme.background.lighten()
+              : theme.background.darken(),
           splashFactory: NoSplash.splashFactory,
           shape: const CircleBorder(),
         ),
