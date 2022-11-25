@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wives/providers/terminal_theme_provider.dart';
 import 'package:wives/components/custom_tiles.dart';
 import 'package:wives/components/window_title_bar.dart';
 import 'package:wives/providers/preferences_provider.dart';
@@ -79,6 +80,39 @@ class TerminalSettings extends HookConsumerWidget {
                 if (shell != null) preferences.setDefaultShell(shell);
               },
             ),
+          ),
+          ListTile(
+            title: const Text("Color Scheme"),
+            trailing: HookBuilder(builder: (context) {
+              final themesFuture = ref.watch(themesProvider);
+
+              return themesFuture.when(
+                data: (themes) {
+                  return DropdownButton<String>(
+                    value: preferences.defaultTheme.key,
+                    items: themes.keys
+                        .toSet()
+                        .map(
+                          (themeKey) => DropdownMenuItem(
+                            value: themeKey,
+                            child: Text(themeKey),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (themeKey) {
+                      if (themeKey != null) {
+                        preferences.setDefaultTheme(
+                          MapEntry(themeKey, themes[themeKey]!),
+                        );
+                      }
+                    },
+                  );
+                },
+                error: (error, stackTrace) =>
+                    const Text("Failed to load themes"),
+                loading: () => const CircularProgressIndicator(),
+              );
+            }),
           ),
           CustomTile(
             title: const Flexible(

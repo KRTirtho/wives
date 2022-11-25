@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wives/providers/terminal_theme_provider.dart';
 import 'package:wives/models/persisted_change_notifier.dart';
+import 'package:xterm/ui.dart';
 
 const fontFamilies = [
   "Jetbrains Mono",
@@ -20,6 +23,8 @@ class PreferencesProvider extends PersistedChangeNotifier {
   String? defaultShell;
   String? defaultWorkingDirectory;
   String fontFamily;
+  MapEntry<String, TerminalTheme> defaultTheme =
+      const MapEntry("Default", TerminalThemes.defaultTheme);
 
   PreferencesProvider(
     this.ref, {
@@ -54,6 +59,12 @@ class PreferencesProvider extends PersistedChangeNotifier {
     updatePersistence();
   }
 
+  void setDefaultTheme(MapEntry<String, TerminalTheme> theme) {
+    defaultTheme = theme;
+    notifyListeners();
+    updatePersistence();
+  }
+
   @override
   FutureOr<void> loadFromLocal(Map<String, dynamic> map) {
     fontSize = map['fontSize'] ?? fontSize;
@@ -61,6 +72,14 @@ class PreferencesProvider extends PersistedChangeNotifier {
     defaultWorkingDirectory =
         map['defaultWorkingDirectory'] ?? defaultWorkingDirectory;
     fontFamily = map['fontFamily'] ?? fontFamily;
+
+    if (map['defaultTheme'] != null) {
+      final decodedTheme = jsonDecode(map['defaultTheme']);
+      defaultTheme = MapEntry(
+        decodedTheme['name'],
+        TerminalThemeJson.fromJson(decodedTheme['theme']),
+      );
+    }
   }
 
   @override
@@ -70,6 +89,10 @@ class PreferencesProvider extends PersistedChangeNotifier {
       'fontFamily': fontFamily,
       'defaultShell': defaultShell,
       'defaultWorkingDirectory': defaultWorkingDirectory,
+      'defaultTheme': jsonEncode({
+        "name": defaultTheme.key,
+        "theme": defaultTheme.value.toJson(),
+      }),
     };
   }
 }

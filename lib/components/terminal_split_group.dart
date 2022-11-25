@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:multi_split_view/multi_split_view.dart';
+import 'package:wives/providers/terminal_theme_provider.dart';
 import 'package:wives/components/compact_icon_button.dart';
 import 'package:wives/providers/preferences_provider.dart';
 import 'package:wives/providers/terminal_tree.dart';
@@ -36,6 +37,7 @@ class TerminalSplitGroup extends HookConsumerWidget {
       }
 
       node.focusNode.addListener(listener);
+
       return () {
         node.focusNode.removeListener(listener);
       };
@@ -59,6 +61,7 @@ class TerminalSplitGroup extends HookConsumerWidget {
           onSecondaryTapDown: (details, cellOffset) =>
               onSecondaryTapDown?.call(node, details, cellOffset),
           shortcuts: shortcuts,
+          theme: preferences.defaultTheme.value,
         ),
         Material(
           type: MaterialType.transparency,
