@@ -93,7 +93,13 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       debugShowCheckedModeBanner: false,
       title: 'Terminal',
       builder: (context, child) => DragToResizeArea(
-        child: child!,
+        child: Platform.isLinux
+            ? DragToResizeArea(
+                resizeEdgeColor: Colors.white,
+                resizeEdgeSize: 0.2,
+                child: child!,
+              )
+            : child!,
       ),
       darkTheme: ThemeData.dark().copyWith(
         backgroundColor: background,

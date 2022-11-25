@@ -80,7 +80,7 @@ class TerminalFrame extends HookConsumerWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.background,
+                          color: Theme.of(context).primaryColor,
                           width: Tween<double>(begin: 0, end: 2).transform(
                             animation.value,
                           ),
