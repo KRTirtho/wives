@@ -36,6 +36,31 @@ jobs:
           name: Wives-Linux-Bundle
           path: dist/
 
+  build_macos:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          cache: true
+      - run: flutter config --enable-macos-desktop
+      - run: flutter pub get
+      - run: dart pub global activate flutter_distributor
+      - run: npm install -g appdmg
+      - run: flutter_distributor package --platform macos --targets dmg --skip-clean
+      - run: mv dist/**/wives-*-macos.dmg dist/wives-macos-universal.dmg
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Wives-Macos-Bundle
+          path: |
+            dist/wives-macos-universal.dmg
+      - name: Setup upterm session
+        if: ${{ failure() }}
+        uses: lhotari/action-upterm@v1
+        with:
+          limit-access-to-actor: true
+
+
   windows:
     runs-on: windows-latest
     steps:
