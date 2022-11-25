@@ -3,16 +3,13 @@ import 'dart:io';
 
 import 'package:wives/extensions/size.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:wives/hooks/useAutoScrollController.dart';
-import 'package:wives/hooks/usePaletteOverlay.dart';
-import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/models/cache_keys.dart';
-import 'package:wives/intents/intents.dart';
+import 'package:wives/providers/shortcuts_provider.dart';
 import 'package:wives/routes.dart';
 
 Future<SharedPreferences> get localStorage => SharedPreferences.getInstance();
@@ -76,13 +73,13 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    final terminalTabScrollController = useAutoScrollController();
-    final openPalette = usePaletteOverlay();
-
-    useEffect(() {
-      router.go("/", extra: terminalTabScrollController);
-      return null;
-    }, []);
+    final shortcuts = ref.watch(
+      TerminalShortcuts.provider.notifier.select(
+        (s) => s.rootActions.map((s) {
+          return MapEntry(s.shortcut!, TerminalIntent(context, s));
+        }),
+      ),
+    );
 
     return MaterialApp.router(
       routerConfig: router,
@@ -123,30 +120,11 @@ class _TerminalState extends ConsumerState<Terminal> with WindowListener {
       themeMode: ThemeMode.dark,
       shortcuts: {
         ...WidgetsApp.defaultShortcuts,
-        const SingleActivator(LogicalKeyboardKey.comma, control: true):
-            const NavigationIntent(path: "/settings"),
-        const SingleActivator(LogicalKeyboardKey.equal, control: true):
-            FontAdjustmentIntent(ref: ref, adjustment: 1),
-        const SingleActivator(LogicalKeyboardKey.minus, control: true):
-            FontAdjustmentIntent(ref: ref, adjustment: -1),
-        const SingleActivator(
-          LogicalKeyboardKey.keyP,
-          control: true,
-          shift: true,
-        ): const PaletteIntent(),
-        ...useTabShortcuts(ref, terminalTabScrollController),
+        ...Map.fromEntries(shortcuts),
       },
       actions: {
         ...WidgetsApp.defaultActions,
-        TabIntent: TabAction(),
-        SplitViewIntent: SplitViewAction(),
-        NavigationIntent: NavigationAction(),
-        FontAdjustmentIntent: FontAdjustmentAction(),
-        CursorSelectorIntent: CursorSelectorAction(),
-        CopyPasteIntent: CopyPasteAction(),
-        PaletteIntent: CallbackAction(
-          onInvoke: (intent) => openPalette(),
-        )
+        TerminalIntent: TerminalIntentAction(),
       },
     );
   }

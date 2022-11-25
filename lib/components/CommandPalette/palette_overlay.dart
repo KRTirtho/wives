@@ -1,167 +1,12 @@
 import 'dart:ui';
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wives/collection/terminal_actions.dart';
 import 'package:wives/components/keyboard_key.dart';
-import 'package:wives/intents/intents.dart';
-import 'package:wives/models/palette_actions.dart';
-import 'package:wives/providers/preferences_provider.dart';
-import 'package:wives/providers/terminal_tree.dart';
-
-final Iterable<PaletteAction> actionsMap = [
-  PaletteAction(
-    title: "New Tab",
-    description: "Create a new tab",
-    icon: FluentIcons.add_12_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.keyT,
-      LogicalKeyboardKey.control,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      terminal.createNewTerminalTab();
-    },
-  ),
-  PaletteAction(
-    title: "Close Tab",
-    description: "Close currently focused tab",
-    icon: FluentIcons.calendar_cancel_16_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.keyW,
-      LogicalKeyboardKey.control,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      terminal.closeTerminalTab();
-    },
-  ),
-  PaletteAction(
-    title: "Split Vertically",
-    description: "Vertically split currently focused terminal",
-    icon: FluentIcons.split_vertical_12_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.arrowRight,
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      terminal.focused?.split(TerminalAxis.column);
-    },
-  ),
-  PaletteAction(
-    title: "Split Horizontally",
-    description: "Horizontally split currently focused terminal",
-    icon: FluentIcons.split_horizontal_12_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.arrowDown,
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      terminal.focused?.split(TerminalAxis.row);
-    },
-  ),
-  PaletteAction(
-    title: "Close Split Terminal",
-    description: "Close focused terminal in the split view",
-    icon: Icons.close,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.keyW,
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      final parent = terminal.focused?.parent;
-      parent?.removeChild(terminal.focused!);
-    },
-  ),
-  PaletteAction(
-    title: "Settings",
-    icon: FluentIcons.settings_28_regular,
-    shortcut:
-        LogicalKeySet(LogicalKeyboardKey.keyS, LogicalKeyboardKey.control),
-    onInvoke: (context, ref) async {
-      GoRouter.of(context).push("/settings");
-    },
-  ),
-  PaletteAction(
-    title: "Increase Font Size",
-    icon: FluentIcons.font_increase_20_regular,
-    shortcut:
-        LogicalKeySet(LogicalKeyboardKey.equal, LogicalKeyboardKey.control),
-    closeAfterClick: false,
-    onInvoke: (context, ref) async {
-      ref.read(preferencesProvider).setFontSize(
-            ref.read(preferencesProvider).fontSize + 1,
-          );
-    },
-  ),
-  PaletteAction(
-    title: "Decrease Font Size",
-    icon: FluentIcons.font_decrease_20_regular,
-    closeAfterClick: false,
-    shortcut:
-        LogicalKeySet(LogicalKeyboardKey.minus, LogicalKeyboardKey.control),
-    onInvoke: (context, ref) async {
-      ref.read(preferencesProvider).setFontSize(
-            ref.read(preferencesProvider).fontSize - 1,
-          );
-    },
-  ),
-  PaletteAction(
-    title: "Copy",
-    icon: FluentIcons.copy_16_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.keyC,
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      final node = terminal.focused;
-      if (node == null) return;
-      Actions.of(context).invokeAction(
-        CopyPasteAction(),
-        CopyPasteIntent(
-          node.terminal,
-          controller: node.controller,
-          intentType: CopyPasteIntentType.copy,
-        ),
-      );
-    },
-  ),
-  PaletteAction(
-    title: "Paste",
-    icon: FluentIcons.clipboard_paste_16_regular,
-    shortcut: LogicalKeySet(
-      LogicalKeyboardKey.keyV,
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-    ),
-    onInvoke: (context, ref) async {
-      final terminal = ref.read(TerminalTree.provider);
-      final node = terminal.focused;
-      if (node == null) return;
-      Actions.of(context).invokeAction(
-        CopyPasteAction(),
-        CopyPasteIntent(
-          node.terminal,
-          controller: node.controller,
-          intentType: CopyPasteIntentType.paste,
-        ),
-      );
-    },
-  ),
-]
-  ..sort((a, b) => a.title.compareTo(b.title))
-  ..toSet();
+import 'package:wives/providers/shortcuts_provider.dart';
 
 const _specialLKeys = [
   LogicalKeyboardKey.tab,
@@ -188,6 +33,16 @@ class PaletteOverlay extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final text = useState("");
+    final actionsMap = ref.watch(
+      TerminalShortcuts.provider.notifier.select((s) => s.paletteActions),
+    );
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(ActionStates.paletteState.notifier).state = true;
+      });
+      return null;
+    }, []);
 
     final filteredActions = useMemoized(
       () => text.value.isEmpty
@@ -292,7 +147,7 @@ class PaletteOverlay extends HookConsumerWidget {
                                       )
                                     : null,
                                 onTap: () async {
-                                  await action.onInvoke(context, ref);
+                                  await action.invoke(context);
                                   if (action.closeAfterClick) {
                                     Navigator.of(context).pop();
                                   }

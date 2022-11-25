@@ -1,50 +1,45 @@
 import 'dart:io';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/components/compact_icon_button.dart';
 import 'package:wives/components/window_title_bar.dart';
-import 'package:wives/hooks/useTabShortcuts.dart';
 import 'package:wives/main.dart';
-import 'package:wives/intents/intents.dart';
 import 'package:wives/providers/preferences_provider.dart';
+import 'package:wives/providers/shortcuts_provider.dart';
 import 'package:wives/providers/terminal_tree.dart';
 import 'package:wives/services/native.dart';
 import 'package:flutter/material.dart';
 import 'package:wives/components/terminal_split_group.dart';
 
 class TerminalFrame extends HookConsumerWidget {
-  final AutoScrollController scrollController;
   const TerminalFrame({
-    required this.scrollController,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
+    final scrollController = ref.watch(tabScrollControllerProvider);
     final shells = NativeUtils.getShells();
     final terminalTree = ref.watch(TerminalTree.provider);
 
     final activeRoot = terminalTree.active;
     final activeRootIndex = terminalTree.activeIndex;
 
-    void createNewTab([String? shell]) {
-      final newNode = terminalTree.createNewTerminalTab(shell);
-      scrollController.scrollToIndex(
-        terminalTree.nodes.indexOf(newNode),
-        preferPosition: AutoScrollPosition.begin,
-      );
-    }
-
     void closeTab(int index) {
       terminalTree.closeTerminalTab(terminalTree.nodes[index]);
     }
 
-    final shortcuts = useTabShortcuts(ref, scrollController);
+    final shortcuts = ref.watch(
+      TerminalShortcuts.provider.notifier.select(
+        (s) => s.focusedTerminalActions.map(
+          (t) => MapEntry(t.shortcut!, TerminalIntent(context, t)),
+        ),
+      ),
+    );
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -115,7 +110,7 @@ class TerminalFrame extends HookConsumerWidget {
               children: [
                 const SizedBox(width: 5),
                 CompactIconButton(
-                  onPressed: createNewTab,
+                  onPressed: terminalTree.createNewTerminalTab,
                   child: const Icon(Icons.add_rounded),
                 ),
                 PopupMenuButton<String>(
@@ -124,7 +119,7 @@ class TerminalFrame extends HookConsumerWidget {
                     if (value == "settings") {
                       GoRouter.of(context).push("/settings");
                     } else {
-                      createNewTab(value);
+                      terminalTree.createNewTerminalTab(value);
                     }
                   },
                   onCanceled: activeRoot?.focusNode.requestFocus,
@@ -174,8 +169,8 @@ class TerminalFrame extends HookConsumerWidget {
               final isActive = activeRoot == tab;
               return TerminalSplitGroup(
                 node: tab,
-                onSecondaryTapDown: (activeNode, info, cell) {
-                  showMenu(
+                onSecondaryTapDown: (activeNode, info, cell) async {
+                  final value = await showMenu<String>(
                     context: context,
                     position: RelativeRect.fromLTRB(
                       info.globalPosition.dx,
@@ -185,20 +180,10 @@ class TerminalFrame extends HookConsumerWidget {
                     ),
                     elevation: 0,
                     items: [
-                      PopupMenuItem(
-                        value: "copy",
+                      const PopupMenuItem(
+                        value: "Copy",
                         height: 30,
-                        onTap: () {
-                          Actions.of(context).invokeAction(
-                            CopyPasteAction(),
-                            CopyPasteIntent(
-                              activeNode.terminal,
-                              controller: activeNode.controller,
-                              intentType: CopyPasteIntentType.copy,
-                            ),
-                          );
-                        },
-                        child: const ListTile(
+                        child: ListTile(
                           dense: true,
                           horizontalTitleGap: 0,
                           contentPadding: EdgeInsets.zero,
@@ -206,20 +191,10 @@ class TerminalFrame extends HookConsumerWidget {
                           title: Text("Copy"),
                         ),
                       ),
-                      PopupMenuItem(
-                        value: "paste",
+                      const PopupMenuItem(
+                        value: "Paste",
                         height: 30,
-                        onTap: () {
-                          Actions.of(context).invokeAction(
-                            CopyPasteAction(),
-                            CopyPasteIntent(
-                              activeNode.terminal,
-                              controller: activeNode.controller,
-                              intentType: CopyPasteIntentType.paste,
-                            ),
-                          );
-                        },
-                        child: const ListTile(
+                        child: ListTile(
                           dense: true,
                           horizontalTitleGap: 0,
                           contentPadding: EdgeInsets.zero,
@@ -227,13 +202,10 @@ class TerminalFrame extends HookConsumerWidget {
                           title: Text("Paste"),
                         ),
                       ),
-                      PopupMenuItem(
-                        value: "settings",
+                      const PopupMenuItem(
+                        value: "Settings",
                         height: 30,
-                        onTap: () {
-                          GoRouter.of(context).push("/settings");
-                        },
-                        child: const ListTile(
+                        child: ListTile(
                           dense: true,
                           horizontalTitleGap: 0,
                           contentPadding: EdgeInsets.zero,
@@ -243,52 +215,14 @@ class TerminalFrame extends HookConsumerWidget {
                       ),
                     ],
                   );
+                  if (value == null) return;
+                  final action = ref
+                      .read(TerminalShortcuts.provider)
+                      .firstWhere((element) => element.title == value);
+
+                  await action.invoke(context);
                 },
-                shortcuts: {
-                  if (isActive) ...shortcuts,
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyC,
-                    control: true,
-                    shift: true,
-                  ): CopyPasteIntent(
-                    tab.terminal,
-                    intentType: CopyPasteIntentType.copy,
-                    controller: tab.controller,
-                  ),
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyV,
-                    control: true,
-                    shift: true,
-                  ): CopyPasteIntent(
-                    tab.terminal,
-                    intentType: CopyPasteIntentType.paste,
-                    controller: tab.controller,
-                  ),
-                  const SingleActivator(
-                    LogicalKeyboardKey.arrowRight,
-                    shift: true,
-                  ): CursorSelectorIntent(
-                    tab,
-                    direction: CursorSelectorType.selectRight,
-                  ),
-                  const SingleActivator(
-                    LogicalKeyboardKey.arrowLeft,
-                    shift: true,
-                  ): CursorSelectorIntent(
-                    tab,
-                    direction: CursorSelectorType.selectLeft,
-                  ),
-                  const SingleActivator(LogicalKeyboardKey.arrowLeft):
-                      CursorSelectorIntent(
-                    tab,
-                    direction: CursorSelectorType.clearLeft,
-                  ),
-                  const SingleActivator(LogicalKeyboardKey.arrowRight):
-                      CursorSelectorIntent(
-                    tab,
-                    direction: CursorSelectorType.clearRight,
-                  ),
-                },
+                shortcuts: Map.fromEntries(shortcuts),
               );
             }).toList()[activeRootIndex]
           : Container(),

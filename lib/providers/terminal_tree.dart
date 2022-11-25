@@ -1,9 +1,19 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:wives/models/constants.dart';
 import 'package:wives/providers/preferences_provider.dart';
 import 'package:xterm/core.dart';
 import 'package:xterm/ui.dart';
+import 'package:xterm/src/ui/input_map.dart';
+
+enum CursorSelectorType {
+  selectLeft,
+  selectRight,
+  clearLeft,
+  clearRight,
+}
 
 abstract class TerminalAxis {
   static const row = Axis.vertical;
@@ -162,6 +172,10 @@ class TerminalTree with ChangeNotifier {
     addNode(node);
     active = node;
     node.focusNode.requestFocus();
+    ref.read(tabScrollControllerProvider).scrollToIndex(
+          nodes.indexOf(node),
+          preferPosition: AutoScrollPosition.begin,
+        );
     return node;
   }
 
@@ -179,6 +193,10 @@ class TerminalTree with ChangeNotifier {
     int index = nodes.length - 1 == activeIndex ? 0 : activeIndex! + 1;
     setActiveRoot(nodes.elementAt(index));
     active?.focusNode.requestFocus();
+    ref.read(tabScrollControllerProvider).scrollToIndex(
+          index,
+          preferPosition: AutoScrollPosition.end,
+        );
     return index;
   }
 
@@ -186,6 +204,10 @@ class TerminalTree with ChangeNotifier {
     int index = activeIndex == 0 ? nodes.length - 1 : activeIndex! - 1;
     setActiveRoot(nodes.elementAt(index));
     active?.focusNode.requestFocus();
+    ref.read(tabScrollControllerProvider).scrollToIndex(
+          index,
+          preferPosition: AutoScrollPosition.end,
+        );
     return index;
   }
 
@@ -218,4 +240,72 @@ class TerminalTree with ChangeNotifier {
     focused = node;
     notifyListeners();
   }
+
+  void textSelection(CursorSelectorType type) {
+    final terminal = focused ?? active;
+    if (terminal == null) return;
+    final cursorX = terminal.terminal.buffer.cursorX;
+    final cursorY = terminal.terminal.buffer.cursorY;
+    final selectionBegin = terminal.controller.selection?.begin;
+    final selectionEnd = terminal.controller.selection?.end;
+    final content = terminal.terminal.mainBuffer.currentLine.getText().trim();
+    final contentCursorX = content.trim().length + 1;
+
+    switch (type) {
+      case CursorSelectorType.selectRight:
+        {
+          if (cursorX + 2 > contentCursorX) break;
+          terminal.controller.setSelection(
+            BufferRangeBlock(
+              CellOffset(selectionBegin?.x ?? cursorX, cursorY),
+              CellOffset(
+                cursorX + 1,
+                cursorY,
+              ),
+            ),
+          );
+          terminal.terminal.moveCursorX(1);
+          break;
+        }
+      case CursorSelectorType.selectLeft:
+        {
+          terminal.controller.setSelection(
+            BufferRangeBlock(
+              CellOffset(selectionEnd?.x ?? cursorX, cursorY),
+              CellOffset(
+                cursorX > 0 ? cursorX - 1 : cursorX,
+                cursorY,
+              ),
+            ),
+          );
+          terminal.terminal.moveCursorX(-1);
+          break;
+        }
+      case CursorSelectorType.clearLeft:
+        {
+          terminal.controller.clearSelection();
+
+          if (cursorX > contentCursorX) {
+            terminal.terminal.setCursorX(contentCursorX);
+          }
+          terminal.terminal.keyInput(
+            keyToTerminalKey(LogicalKeyboardKey.arrowLeft)!,
+          );
+          break;
+        }
+      case CursorSelectorType.clearRight:
+        {
+          terminal.controller.clearSelection();
+          if (cursorX > contentCursorX) {
+            terminal.terminal.setCursorX(contentCursorX);
+          }
+          terminal.terminal.keyInput(
+            keyToTerminalKey(LogicalKeyboardKey.arrowRight)!,
+          );
+          break;
+        }
+    }
+  }
 }
+
+final tabScrollControllerProvider = Provider((ref) => AutoScrollController());
