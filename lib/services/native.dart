@@ -8,8 +8,8 @@ class NativeUtils {
         "cmd",
       ];
     }
-    final process = Process.runSync("chsh", ["-l"]);
-    final shells = (process.stdout as String)
+    final shells = File("/etc/shells")
+        .readAsStringSync()
         .split("\n")
         .map((shell) => shell.split("/").last)
         .where((shell) => shell.isNotEmpty)
