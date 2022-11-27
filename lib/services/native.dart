@@ -5,6 +5,7 @@ class NativeUtils {
     if (Platform.isWindows) {
       return [
         "powershell",
+        if (File("C:/Program Files/PowerShell/7/pwsh.exe").existsSync()) "pwsh",
         "cmd",
       ];
     }
