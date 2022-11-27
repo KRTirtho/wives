@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -25,13 +26,14 @@ class WindowsTitleButtons extends StatelessWidget {
       child: IconTheme(
         data: const IconThemeData(size: 18),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: windowManager.minimize,
-              child: const Icon(Icons.minimize),
+              child: const Icon(Icons.minimize_sharp),
             ),
             ElevatedButton(
-              child: const Icon(Icons.check_box_outline_blank),
+              child: const Icon(FluentIcons.maximize_16_regular),
               onPressed: () async {
                 await windowManager.isMaximized()
                     ? await windowManager.unmaximize()
