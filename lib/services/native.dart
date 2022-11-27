@@ -4,9 +4,10 @@ class NativeUtils {
   static List<String> getShells() {
     if (Platform.isWindows) {
       return [
-        "powershell",
-        if (File("C:/Program Files/PowerShell/7/pwsh.exe").existsSync()) "pwsh",
-        "cmd",
+        "cmd.exe",
+        if (File("C:/Program Files/PowerShell/7/pwsh.exe").existsSync())
+          "pwsh.exe",
+        "powershell.exe",
       ];
     }
     final shells = File("/etc/shells")
