@@ -33,7 +33,7 @@ class _WindowTitleBarState extends State<WindowTitleBar> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (Platform.isMacOS) const SizedBox(width: 80),
+            if (Platform.isMacOS) const SizedBox(width: 70),
             if (widget.nonDraggableLeading != null) widget.nonDraggableLeading!,
             Expanded(
               child: DragToMoveArea(
@@ -44,12 +44,10 @@ class _WindowTitleBarState extends State<WindowTitleBar> {
               DragToMoveArea(
                 child: widget.center!,
               ),
-            if (!Platform.isMacOS)
-              DragToMoveArea(
-                child: Platform.isWindows
-                    ? const WindowsTitleButtons()
-                    : const LinuxTitleButtons(),
-              ),
+            if (Platform.isWindows)
+              const DragToMoveArea(child: WindowsTitleButtons()),
+            if (Platform.isLinux)
+              const DragToMoveArea(child: LinuxTitleButtons()),
           ],
         ),
       ),
