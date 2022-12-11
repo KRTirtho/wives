@@ -1,0 +1,110 @@
+name: wives
+description: A Terminal that is as beautiful as your wife or probably better
+
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  xterm: ^3.4.0
+  flutter_pty: ^0.3.1
+  flutter_hooks: ^0.18.5+1
+  collection: ^1.16.0
+  window_manager: ^0.2.7
+  fluentui_system_icons: ^1.1.186
+  scroll_to_index: ^3.0.1
+  path: ^1.8.2
+  riverpod: ^2.1.1
+  hooks_riverpod: ^2.1.1
+  flutter_spinbox: ^0.11.0
+  multi_split_view: ^2.1.0
+  go_router: ^5.1.6
+  tuple: ^2.0.1
+  nanoid: ^1.0.0
+  shared_preferences: ^2.0.15
+  dio: ^4.0.6
+  fuzzywuzzy: ^0.2.0
+  flutter_svg: ^1.1.6
+  url_launcher: ^6.1.7
+  package_info_plus: ^3.0.2
+  version: ^3.0.2
+  http: ^0.13.5
+
+dev_dependencies:
+  flutter_lints: ^2.0.1
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+  #   - images/a_dot_ham.jpeg
+  fonts:
+    - family: Ubuntu Mono
+      fonts:
+        - asset: fonts/UbuntuMono-Regular.ttf
+        - asset: fonts/UbuntuMono-Italic.ttf
+        - asset: fonts/UbuntuMono-BoldItalic.ttf
+        - asset: fonts/UbuntuMono-Bold.ttf
+    - family: Fira Mono
+      fonts:
+        - asset: fonts/FiraMono-Regular.ttf
+        - asset: fonts/FiraMono-Medium.ttf
+        - asset: fonts/FiraMono-Bold.ttf
+    - family: Jetbrains Mono
+      fonts:
+        - asset: fonts/JetBrainsMono-Regular.ttf
+        - asset: fonts/JetBrainsMono-Bold.ttf
+        - asset: fonts/JetBrainsMono-BoldItalic.ttf
+        - asset: fonts/JetBrainsMono-ExtraBold.ttf
+        - asset: fonts/JetBrainsMono-ExtraBoldItalic.ttf
+        - asset: fonts/JetBrainsMono-ExtraLight.ttf
+        - asset: fonts/JetBrainsMono-ExtraLightItalic.ttf
+        - asset: fonts/JetBrainsMono-Italic.ttf
+        - asset: fonts/JetBrainsMono-Light.ttf
+        - asset: fonts/JetBrainsMono-LightItalic.ttf
+        - asset: fonts/JetBrainsMono-Medium.ttf
+        - asset: fonts/JetBrainsMono-MediumItalic.ttf
+        - asset: fonts/JetBrainsMono-SemiBold.ttf
+        - asset: fonts/JetBrainsMono-SemiBoldItalic.ttf
+        - asset: fonts/JetBrainsMono-Thin.ttf
+        - asset: fonts/JetBrainsMono-ThinItalic.ttf
+    - family: Cascadia Mono
+      fonts:
+        - asset: fonts/CascadiaMonoPL.ttf
+    - family: Monoton
+      fonts:
+        - asset: fonts/Monoton-Regular.ttf
+    - family: NotoSans Mono
+      fonts:
+        - asset: fonts/NotoSansMono-Regular.ttf
+        - asset: fonts/NotoSansMono-Black.ttf
+        - asset: fonts/NotoSansMono-Bold.ttf
+        - asset: fonts/NotoSansMono-ExtraBold.ttf
+        - asset: fonts/NotoSansMono-ExtraLight.ttf
+        - asset: fonts/NotoSansMono-Light.ttf
+        - asset: fonts/NotoSansMono-Medium.ttf
+        - asset: fonts/NotoSansMono-SemiBold.ttf
+        - asset: fonts/NotoSansMono-Thin.ttf
+    - family: Redhat Mono
+      fonts:
+        - asset: fonts/RedHatMono-Regular.ttf
+        - asset: fonts/RedHatMono-Bold.ttf
+        - asset: fonts/RedHatMono-BoldItalic.ttf
+        - asset: fonts/RedHatMono-Italic.ttf
+        - asset: fonts/RedHatMono-Light.ttf
+        - asset: fonts/RedHatMono-LightItalic.ttf
+        - asset: fonts/RedHatMono-Medium.ttf
+        - asset: fonts/RedHatMono-MediumItalic.ttf
+        - asset: fonts/RedHatMono-SemiBold.ttf
+        - asset: fonts/RedHatMono-SemiBoldItalic.ttf
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700

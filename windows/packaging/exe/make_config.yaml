@@ -1,0 +1,8 @@
+app_id: 09A5ADD2-D0D7-4DA4-B59D-ADBCBCAA0209
+publisher: Kingkor Roy Tirtho
+publisher_url: https://github.com/KRTirtho/wives
+display_name: Wives
+create_desktop_icon: true
+install_dir_name: Wives
+locales:
+  - en

@@ -1,0 +1,40 @@
+icon: assets/logo.png
+summary: A Terminal that is as beautiful as your wife or probably better
+group: Application/Emulator
+vendor: Kingkor Roy Tirtho
+packager: Kingkor Roy Tirtho
+packagerEmail: krtirtho@gmail.com
+license: GPLv3
+url: https://github.com/KRTirtho/Wives
+
+display_name: Wives
+
+generic_name: Terminal Emulator
+
+categories: 
+  - Flutter
+  - Terminal
+  - Command-Line
+  - System
+  - TerminalEmulator
+
+keywords: 
+  - terminal
+  - console
+  - script
+  - run
+  - execute
+  - command
+  - command-line
+  - commandline
+  - cli
+  - bash
+  - sh
+  - shell
+  - zsh
+  - cmd
+  - command prompt
+
+startup_notify: true
+
+comment: A Terminal that is as beautiful as your wife or probably better
