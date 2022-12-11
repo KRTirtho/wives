@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.1.1 (2022-12-11)
+
+
+### Bug Fixes
+
+* checking update on startup even when turned off ([a267121](https://github.com/KRTirtho/wives/commit/a267121664c280028fb01ec9e2ad43f6d6654a95))
+* icon not showing and context menu settings not working ([d47a284](https://github.com/KRTirtho/wives/commit/d47a284f59e8a18d109b4729f19aacd91af66425))
+* powershell not working ([853448d](https://github.com/KRTirtho/wives/commit/853448d3d5b7bea8eeab3fc60cb6fe80cec5a599))
+
 ## 0.1.0 (2022-12-09)
 
 

@@ -2,7 +2,7 @@ name: wives
 description: A beautiful, modern & feature-rich Terminal Emulator 
 
 publish_to: "none"
-version: 0.1.0+1
+version: 0.1.1+2
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
