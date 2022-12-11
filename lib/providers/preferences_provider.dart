@@ -24,7 +24,7 @@ class PreferencesProvider extends PersistedChangeNotifier {
   String? defaultShell;
   String? defaultWorkingDirectory;
   String fontFamily;
-  bool checkUpdate;
+  bool? checkUpdate;
   ThemeMode themeMode;
 
   MapEntry<String, TerminalTheme> defaultTheme =
@@ -36,7 +36,7 @@ class PreferencesProvider extends PersistedChangeNotifier {
     this.fontFamily = "Jetbrains Mono",
     this.defaultShell,
     this.defaultWorkingDirectory,
-    this.checkUpdate = true,
+    this.checkUpdate,
     this.themeMode = ThemeMode.dark,
   }) : super();
 

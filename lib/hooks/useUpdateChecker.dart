@@ -46,7 +46,7 @@ void useUpdateChecker(WidgetRef ref) {
       );
 
   useEffect(() {
-    if (!isCheckUpdateEnabled) return null;
+    if (isCheckUpdateEnabled != true) return null;
     checkUpdate().then((value) {
       final currentVersion = value.first;
       final latestVersion = value.last;

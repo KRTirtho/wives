@@ -155,7 +155,7 @@ class TerminalSettings extends HookConsumerWidget {
                         const Icon(FluentIcons.arrow_repeat_1_16_regular),
                     activeColor: preferences.defaultTheme.value.blue,
                     title: const Text("Check for updates"),
-                    value: preferences.checkUpdate,
+                    value: preferences.checkUpdate == true,
                     onChanged: (value) {
                       preferences.setCheckUpdate(value);
                     },
