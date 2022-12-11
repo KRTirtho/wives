@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_pty/flutter_pty.dart';
 import 'package:wives/services/native.dart';
@@ -12,7 +13,7 @@ class Constants {
       workingDirectory: workingDirectory,
       columns: terminal.viewWidth,
       rows: terminal.viewHeight,
-      environment: {'TERM': 'xterm-256color'},
+      environment: {'TERM': 'xterm-256color', ...Platform.environment},
     );
 
     pty.output
