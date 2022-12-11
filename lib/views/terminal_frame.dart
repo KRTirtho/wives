@@ -205,7 +205,7 @@ class TerminalFrame extends HookConsumerWidget {
                         ),
                       ),
                       const PopupMenuItem(
-                        value: "Settings",
+                        value: "Open Settings",
                         height: 30,
                         child: ListTile(
                           dense: true,
