@@ -1,9 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pty/flutter_pty.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:wives/models/constants.dart';
 import 'package:wives/providers/preferences_provider.dart';
+import 'package:wives/routes.dart';
+import 'package:wives/services/native.dart';
 import 'package:xterm/core.dart';
 import 'package:xterm/ui.dart';
 import 'package:xterm/src/ui/input_map.dart';
@@ -54,12 +61,12 @@ class TerminalNode {
   Axis? parentAxis;
 
   final Ref ref;
-  final VoidCallback updateTree;
+  final TerminalTree tree;
 
   TerminalNode(
     this.ref, {
+    required this.tree,
     required this.terminal,
-    required this.updateTree,
     this.parent,
     this.parentAxis,
     this.axis = TerminalAxis.row,
@@ -71,6 +78,10 @@ class TerminalNode {
         focusNode = focusNode ?? FocusNode(),
         assert((parent == null && parentAxis == null) ||
             (parent != null && parentAxis != null));
+
+  void updateTree() {
+    tree.notifyListeners();
+  }
 
   void addChild(TerminalNode child) {
     if (child.parent != this) {
@@ -109,11 +120,8 @@ class TerminalNode {
     final node = TerminalNode(
       ref,
       parentAxis: axis,
-      updateTree: updateTree,
-      terminal: Constants.terminal(
-        shell ?? ref.read(preferencesProvider).defaultShell,
-        ref.read(preferencesProvider).defaultWorkingDirectory,
-      ),
+      tree: tree,
+      terminal: tree.getTerminal(ref, shell),
       parent: this,
     );
     addChild(node);
@@ -142,6 +150,47 @@ class TerminalTree with ChangeNotifier {
 
   TerminalNode? active;
   int? get activeIndex => active != null ? nodes.indexOf(active!) : null;
+  PreferencesProvider get preferences => ref.read(preferencesProvider);
+
+  Terminal getTerminal(Ref ref, [String? shell, String? workingDirectory]) {
+    shell ??= ref.read(preferencesProvider).defaultShell;
+    workingDirectory ??= ref.read(preferencesProvider).defaultWorkingDirectory;
+    final terminal = Terminal();
+    final pty = Pty.start(
+      shell ?? NativeUtils.getShells().last,
+      workingDirectory: workingDirectory,
+      columns: terminal.viewWidth,
+      rows: terminal.viewHeight,
+      environment: {
+        ...Platform.environment,
+        'TERM': 'xterm-256color',
+      },
+    );
+
+    pty.output
+        .cast<List<int>>()
+        .transform(const Utf8Decoder())
+        .listen(terminal.write);
+
+    pty.exitCode.then((code) {
+      final tab = nodes.firstWhere((s) => s.terminal == terminal);
+      if (_nodes.length <= 1) {
+        exit(0);
+      } else {
+        closeTerminalTab(tab);
+      }
+    });
+
+    terminal.onOutput = (data) {
+      pty.write(const Utf8Encoder().convert(data));
+    };
+
+    terminal.onResize = (w, h, pw, ph) {
+      pty.resize(h, w);
+    };
+
+    return terminal;
+  }
 
   void addNode(TerminalNode node) {
     if (node.isRoot) {
@@ -162,11 +211,11 @@ class TerminalTree with ChangeNotifier {
   TerminalNode createNewTerminalTab([String? shell, String? workingDirectory]) {
     final node = TerminalNode(
       ref,
-      updateTree: notifyListeners,
-      terminal: Constants.terminal(
-        shell ?? ref.read(preferencesProvider).defaultShell,
-        workingDirectory ??
-            ref.read(preferencesProvider).defaultWorkingDirectory,
+      tree: this,
+      terminal: getTerminal(
+        ref,
+        shell,
+        workingDirectory,
       ),
     );
     addNode(node);
@@ -179,8 +228,38 @@ class TerminalTree with ChangeNotifier {
     return node;
   }
 
-  void closeTerminalTab([TerminalNode? node]) {
-    if (_nodes.length <= 1 || !_nodes.contains(node ?? active)) return;
+  Future<void> closeTerminalTab([TerminalNode? node]) async {
+    if (!_nodes.contains(node ?? active)) return;
+    if (_nodes.length <= 1) {
+      final result = await showDialog<bool>(
+        context: routerKey.currentContext!,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Close Terminal"),
+            content: const Text("Do you want to close the terminal?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('Yes'),
+              ),
+            ],
+          );
+        },
+      );
+      if (result == true) {
+        exit(0);
+      } else {
+        return;
+      }
+    }
     // closes the Tab/Removes the tab
     removeNode(
       node ?? active!,

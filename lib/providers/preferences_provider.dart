@@ -86,6 +86,11 @@ class PreferencesProvider extends PersistedChangeNotifier {
     updatePersistence();
   }
 
+  void setAlwaysExitOnCloseLastTab(bool value) {
+    notifyListeners();
+    updatePersistence();
+  }
+
   @override
   FutureOr<void> loadFromLocal(Map<String, dynamic> map) {
     fontSize = map['fontSize'] ?? fontSize;
