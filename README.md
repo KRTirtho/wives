@@ -38,7 +38,7 @@ But for real,
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+Contributions are welcome. Please read [CONTRIBUTION.md](CONTRIBUTION.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 
 ## Support Us
