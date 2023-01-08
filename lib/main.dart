@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:window_size/window_size.dart';
 import 'package:wives/extensions/size.dart';
 import 'package:wives/extensions/color.dart';
 import 'package:flutter/material.dart';
@@ -18,23 +20,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  setWindowMinSize(const Size(700, 400));
   const windowOptions = WindowOptions(
     titleBarStyle: TitleBarStyle.hidden,
     title: 'Wives',
-    minimumSize: Size(700, 400),
   );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
     final store = await localStorage;
     if (!Platform.isLinux) await windowManager.setHasShadow(true);
     await windowManager.setResizable(true);
-    await windowManager.setMinimumSize(const Size(700, 400));
-    if (store.getString(CacheKeys.windowSize) != null &&
-        store.getBool(CacheKeys.windowMaximized) != true) {
-      final size = SizeSerializer.fromJson(
-          jsonDecode(store.getString(CacheKeys.windowSize)!));
-      await windowManager.setSize(size);
-    }
-    if (store.getBool(CacheKeys.windowMaximized) == true) {
+    final rawSize = store.getString(CacheKeys.windowSize);
+    final wasMaximized = store.getBool(CacheKeys.windowMaximized) == true;
+    if (rawSize != null && !wasMaximized) {
+      var size = SizeSerializer.fromJson(
+        jsonDecode(store.getString(CacheKeys.windowSize)!),
+      );
+      if (Platform.isLinux && kReleaseMode) {
+        size = Size(size.width + 70, size.height + 70);
+      }
+      await windowManager.setSize(size, animate: true);
+    } else {
       await windowManager.maximize();
     }
     await windowManager.show();
@@ -50,25 +55,36 @@ class Terminal extends StatefulHookConsumerWidget {
   ConsumerState<Terminal> createState() => TerminalState();
 }
 
-class TerminalState extends ConsumerState<Terminal> with WindowListener {
+class TerminalState extends ConsumerState<Terminal>
+    with WidgetsBindingObserver {
+  Size? prevSize;
+
   @override
   void initState() {
     super.initState();
-    windowManager.addListener(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    windowManager.removeListener(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
-  void onWindowResize() async {
+  void didChangeMetrics() async {
     final store = await localStorage;
-    final size = await windowManager.getSize();
-    store.setBool(CacheKeys.windowMaximized, await windowManager.isMaximized());
-    store.setString(CacheKeys.windowSize, jsonEncode(size.toJson()));
+    final size = WidgetsBinding.instance.window.physicalSize;
+    final windowSameDimension =
+        prevSize?.width == size.width && prevSize?.height == size.height;
+    if (windowSameDimension) return;
+    await store.setBool(
+      CacheKeys.windowMaximized,
+      await windowManager.isMaximized(),
+    );
+    await store.setString(CacheKeys.windowSize, jsonEncode(size.toJson()));
+    prevSize = size;
+    super.didChangeMetrics();
   }
 
   @override
