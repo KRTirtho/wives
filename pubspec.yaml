@@ -31,7 +31,7 @@ dependencies:
   tuple: ^2.0.1
   nanoid: ^1.0.0
   shared_preferences: ^2.0.15
-  dio: ^4.0.6
+  dio: ^5.0.3
   fuzzywuzzy: ^0.2.0
   flutter_svg: ^1.1.6
   url_launcher: ^6.1.7
