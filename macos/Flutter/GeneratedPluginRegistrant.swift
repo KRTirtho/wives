@@ -7,7 +7,7 @@ import Foundation
 
 import package_info_plus
 import screen_retriever
-import shared_preferences_macos
+import shared_preferences_foundation
 import url_launcher_macos
 import window_manager
 import window_size

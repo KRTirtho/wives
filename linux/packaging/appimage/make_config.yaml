@@ -1,2 +1,13 @@
-appId: com.github.KRTirtho.wives
+display_name: Wives
 icon: assets/logo.png
+
+keywords:
+  - Terminal
+  - Shell
+  - Command-Line
+  - Cross-Platform
+
+generic_name: Terminal
+categories:
+  - System
+  - TerminalEmulator
