@@ -8,38 +8,38 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  collection: ^1.16.0
+  dio: ^5.1.1
+  fluentui_system_icons: ^1.1.186
+  flutter_hooks: ^0.18.5+1
+  flutter_pty: ^0.3.1
+  flutter_spinbox: ^0.13.0
+  flutter_svg: ^2.0.5
   flutter:
     sdk: flutter
-  xterm: ^3.4.0
-  flutter_pty: ^0.3.1
-  flutter_hooks: ^0.18.5+1
-  collection: ^1.16.0
-  window_manager: ^0.2.7
-  window_size:
-    git:
-      url: https://github.com/google/flutter-desktop-embedding.git
-      ref: a738913c8ce2c9f47515382d40827e794a334274
-      path: plugins/window_size
-  fluentui_system_icons: ^1.1.186
-  scroll_to_index: ^3.0.1
+  fuzzywuzzy: ^0.2.0
+  go_router: ^6.5.7
+  hooks_riverpod: ^2.1.1
+  http: ^0.13.5
+  logging: ^1.1.0
+  multi_split_view: ^2.1.0
+  nanoid: ^1.0.0
+  package_info_plus: ^3.0.2
   path: ^1.8.2
   riverpod: ^2.1.1
-  hooks_riverpod: ^2.1.1
-  flutter_spinbox: ^0.11.0
-  multi_split_view: ^2.1.0
-  go_router: ^5.1.6
-  tuple: ^2.0.1
-  nanoid: ^1.0.0
+  scroll_to_index: ^3.0.1
   shared_preferences: ^2.0.15
-  dio: ^4.0.6
-  fuzzywuzzy: ^0.2.0
-  flutter_svg: ^1.1.6
-  url_launcher: ^6.1.7
-  package_info_plus: ^3.0.2
-  version: ^3.0.2
-  http: ^0.13.5
   stack_trace: ^1.10.0
-  logging: ^1.1.0
+  tuple: ^2.0.1
+  url_launcher: ^6.1.7
+  version: ^3.0.2
+  window_manager: ^0.3.2
+  window_size:
+    git:
+      path: plugins/window_size
+      ref: a738913c8ce2c9f47515382d40827e794a334274
+      url: https://github.com/google/flutter-desktop-embedding.git
+  xterm: ^3.4.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1
@@ -50,7 +50,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-  #   - images/a_dot_ham.jpeg
   fonts:
     - family: Ubuntu Mono
       fonts:
@@ -110,8 +109,3 @@ flutter:
         - asset: fonts/RedHatMono-MediumItalic.ttf
         - asset: fonts/RedHatMono-SemiBold.ttf
         - asset: fonts/RedHatMono-SemiBoldItalic.ttf
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
