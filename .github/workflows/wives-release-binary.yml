@@ -1,0 +1,258 @@
+name: Wives Release Binary
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (x.x.x)
+        default: 0.1.1
+        required: true
+      channel:
+        type: choice
+        description: Release Channel
+        required: true
+        options:
+          - stable
+          - nightly
+        default: nightly
+      debug:
+        description: Debug on failed when channel is nightly
+        required: true
+        type: boolean
+        default: false
+      dry_run:
+        description: Dry run
+        required: true
+        type: boolean
+        default: true
+
+env:
+  FLUTTER_VERSION: '3.10.0'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.10.0
+        with:
+          cache: true
+          flutter-version: ${{ env.FLUTTER_VERSION  }}
+
+      - name: Replace pubspec version and BUILD_VERSION Env (nightly)
+        if: ${{ inputs.channel == 'nightly' }}
+        run: |
+          choco install sed make yq -y
+          yq -i '.version |= sub("\+\d+", "+${{ inputs.channel }}.")' pubspec.yaml
+          yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
+          "BUILD_VERSION=${{ inputs.version }}+${{ inputs.channel }}.${{ github.run_number }}" >> $env:GITHUB_ENV
+
+      - name: BUILD_VERSION Env (stable)
+        if: ${{ inputs.channel == 'stable' }}
+        run: |
+          "BUILD_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
+
+      - name: Replace version in files
+        run: |
+          choco install sed make -y
+          sed -i "s/%{{WIVES_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/runner/Runner.rc
+      # sed -i "s/%{{WIVES_VERSION}}%/${{ env.BUILD_VERSION }}/" choco-struct/tools/VERIFICATION.txt
+      # sed -i "s/%{{WIVES_VERSION}}%/${{ env.BUILD_VERSION }}/" choco-struct/wives.nuspec
+
+
+      - name: Install Pub Dependencies
+        run: |
+          flutter config --enable-windows-desktop
+          flutter pub get
+
+      - name: Build Windows Executable
+        run: |
+          dart pub global activate flutter_distributor
+          make innoinstall
+          flutter_distributor package --platform=windows --targets=exe --skip-clean
+          mv dist/**/wives-*-windows-setup.exe dist/Wives-windows-x86_64-setup.exe
+
+      # - name: Create Chocolatey Package and set hash
+      #   if: ${{ inputs.channel == 'stable' }}
+      #   run: |
+      #     Set-Variable -Name HASH -Value (Get-FileHash dist\Wives-windows-x86_64-setup.exe).Hash
+      #     sed -i "s/%{{WIN_SHA256}}%/$HASH/" choco-struct/tools/VERIFICATION.txt
+      #     make choco
+      #     mv dist/wives.*.nupkg dist/Wives-windows-x86_64.nupkg
+
+      - name: Debug With SSH When fails
+        if: ${{ failure() && inputs.debug && inputs.channel == 'nightly' }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Release-Binaries
+          path: dist/
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.10.0
+        with:
+          cache: true
+          flutter-version: ${{ env.FLUTTER_VERSION  }}
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y tar clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libunwind-dev locate patchelf
+
+      - name: Install AppImage Tool
+        run: |
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          mv appimagetool /usr/local/bin/
+
+      - name: Replace pubspec version and BUILD_VERSION Env (nightly)
+        if: ${{ inputs.channel == 'nightly' }}
+        run: |
+          curl -sS https://webi.sh/yq | sh
+          yq -i '.version |= sub("\+\d+", "+${{ inputs.channel }}.")' pubspec.yaml
+          yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
+          echo "BUILD_VERSION=${{ inputs.version }}+${{ inputs.channel  }}.${{ github.run_number }}" >> $GITHUB_ENV
+
+      - name: BUILD_VERSION Env (stable)
+        if: ${{ inputs.channel == 'stable' }}
+        run: |
+          echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Build Linux Packages
+        run: |
+          dart pub global activate flutter_distributor
+          alias dpkg-deb="dpkg-deb --Zxz"
+          flutter_distributor package --platform=linux --targets=deb
+          flutter_distributor package --platform=linux --targets=appimage
+          flutter_distributor package --platform=linux --targets=rpm
+
+      - name: Create tar.xz (stable)
+        if: ${{ inputs.channel == 'stable' }}
+        run: make tar VERSION=${{ env.BUILD_VERSION }}
+      
+      - name: Create tar.xz (nightly)
+        if: ${{ inputs.channel == 'nightly' }}
+        run: make tar VERSION=nightly
+
+      - name: Move Files to dist
+        run: |
+          mv build/wives-linux-*-x86_64.tar.xz dist/
+          mv dist/**/wives-*-linux.deb dist/Wives-linux-x86_64.deb
+          mv dist/**/wives-*-linux.rpm dist/Wives-linux-x86_64.rpm
+          mv dist/**/wives-*-linux.AppImage dist/Wives-linux-x86_64.AppImage
+
+      - name: Debug With SSH When fails
+        if: ${{ failure() && inputs.debug && inputs.channel == 'nightly' }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Release-Binaries
+          path: dist/
+
+  macos:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.10.0
+        with:
+          cache: true
+          flutter-version: ${{ env.FLUTTER_VERSION  }}
+
+      - name: Replace pubspec version and BUILD_VERSION Env (nightly)
+        if: ${{ inputs.channel == 'nightly' }}
+        run: |
+          brew install yq
+          yq -i '.version |= sub("\+\d+", "+${{ inputs.channel }}.")' pubspec.yaml
+          yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
+          echo "BUILD_VERSION=${{ inputs.version }}+${{ inputs.channel  }}.${{ github.run_number }}" >> $GITHUB_ENV
+
+      - name: BUILD_VERSION (stable)
+        if: ${{ inputs.channel == 'stable' }}
+        run: |
+          echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Build Macos App
+        run: |
+          flutter config --enable-macos-desktop
+          flutter build macos
+          du -sh build/macos/Build/Products/Release/wives.app
+
+      - name: Package Macos App
+        run: |
+          npm install -g appdmg
+          mkdir -p build/${{ env.BUILD_VERSION }}
+          appdmg appdmg.json build/Wives-macos-universal.dmg
+
+      - name: Debug With SSH When fails
+        if: ${{ failure() && inputs.debug && inputs.channel == 'nightly' }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Release-Binaries
+          path: |
+            build/Wives-macos-universal.dmg
+
+  upload:
+    runs-on: ubuntu-latest
+    needs:
+      - windows
+      - linux
+      - macos
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: Wives-Release-Binaries
+          path: ./Wives-Release-Binaries
+
+      - name: Install dependencies
+        run: sudo apt-get install tree -y
+
+      - name: Generate Checksums
+        run: |
+          tree .
+          md5sum Wives-Release-Binaries/* >> RELEASE.md5sum
+          sha256sum Wives-Release-Binaries/* >> RELEASE.sha256sum
+          sed -i 's|Wives-Release-Binaries/||' RELEASE.sha256sum RELEASE.md5sum
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wives-Release-Binaries
+          path: |
+            RELEASE.md5sum
+            RELEASE.sha256sum
+
+      - name: Upload Release Binaries (stable)
+        if: ${{ !inputs.dry_run && inputs.channel == 'stable' }}
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ inputs.version }} # mind the "v" prefix
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          allowUpdates: true
+          artifacts: Wives-Release-Binaries/*,RELEASE.sha256sum,RELEASE.md5sum
+
+      - name: Upload Release Binaries (nightly)
+        if: ${{ !inputs.dry_run && inputs.channel == 'nightly' }}
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          allowUpdates: true
+          artifacts: Wives-Release-Binaries/*,RELEASE.sha256sum,RELEASE.md5sum
