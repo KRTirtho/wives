@@ -183,14 +183,8 @@ jobs:
       - name: Build Macos App
         run: |
           flutter config --enable-macos-desktop
-          flutter build macos --no-tree-shake-icons
-          du -sh build/macos/Build/Products/Release/wives.app
-
-      - name: Package Macos App
-        run: |
-          npm install -g appdmg
-          mkdir -p build/${{ env.BUILD_VERSION }}
-          appdmg appdmg.json build/Wives-macos-universal.dmg
+          flutter_distribution package --platform=macos --targets=dmg --flutter-build-args=no-tree-shake-icons --skip-clean
+          mv dist/**/wives-*-macos.dmg build/Wives-macos-universal.dmg
 
       - name: Debug With SSH When fails
         if: ${{ failure() && inputs.debug && inputs.channel == 'nightly' }}
