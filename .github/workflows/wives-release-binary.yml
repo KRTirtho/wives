@@ -182,6 +182,7 @@ jobs:
 
       - name: Build Macos App
         run: |
+          npm install -g appdmg
           flutter config --enable-macos-desktop
           flutter pub get
           flutter pub global activate flutter_distributor
