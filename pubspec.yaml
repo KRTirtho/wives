@@ -5,26 +5,26 @@ publish_to: "none"
 version: 0.1.1+2
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   collection: ^1.16.0
   dio: ^5.1.1
   fluentui_system_icons: ^1.1.186
   flutter_hooks: ^0.18.5+1
-  flutter_pty: ^0.3.1
+  flutter_pty: ^0.4.0
   flutter_spinbox: ^0.13.0
   flutter_svg: ^2.0.5
   flutter:
     sdk: flutter
-  fuzzywuzzy: ^0.2.0
-  go_router: ^6.5.7
+  fuzzywuzzy: ^1.1.6
+  go_router: ^9.0.0
   hooks_riverpod: ^2.1.1
-  http: ^0.13.5
+  http: ^1.1.0
   logging: ^1.1.0
   multi_split_view: ^2.1.0
   nanoid: ^1.0.0
-  package_info_plus: ^3.0.2
+  package_info_plus: ^4.0.2
   path: ^1.8.2
   riverpod: ^2.1.1
   scroll_to_index: ^3.0.1
@@ -37,9 +37,9 @@ dependencies:
   window_size:
     git:
       path: plugins/window_size
-      ref: a738913c8ce2c9f47515382d40827e794a334274
+      ref: 6c66ad23ee79749f30a8eece542cf54eaf157ed8
       url: https://github.com/google/flutter-desktop-embedding.git
-  xterm: ^3.4.0
+  xterm: ^3.5.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1

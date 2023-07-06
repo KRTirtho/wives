@@ -117,9 +117,12 @@ class TerminalSplitGroup extends HookConsumerWidget {
 
     return MultiSplitViewTheme(
       data: MultiSplitViewThemeData(
-        dividerThickness: 1,
+        dividerThickness: 2,
         dividerPainter: DividerPainter(
+          animationEnabled: true,
           backgroundColor: Theme.of(context).dividerColor,
+          highlightedBackgroundColor:
+              Theme.of(context).dividerColor.withOpacity(0.6),
         ),
       ),
       child: MultiSplitView(

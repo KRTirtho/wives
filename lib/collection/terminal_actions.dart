@@ -174,14 +174,11 @@ List<TerminalAction> createDefaultActionsMap(Ref ref) => [
         shortcut:
             TerminalShortcutActivator(LogicalKeyboardKey.comma, control: true),
         onInvoke: (context, ref) async {
-          final InheritedGoRouter? inherited =
-              context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
-          if ((inherited?.goRouter ?? router)
-              .location
-              .startsWith("/settings")) {
+          final routerState = GoRouterState.of(context);
+          if (routerState.location.startsWith("/settings")) {
             return;
           }
-          (inherited?.goRouter ?? router).push("/settings");
+          router.push("/settings");
         },
       ),
       TerminalAction(
@@ -198,14 +195,11 @@ List<TerminalAction> createDefaultActionsMap(Ref ref) => [
           shift: true,
         ),
         onInvoke: (context, ref) async {
-          final InheritedGoRouter? inherited =
-              context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
-          if ((inherited?.goRouter ?? router)
-              .location
-              .startsWith("/settings/color-scheme")) {
+          final routerState = GoRouterState.of(context);
+          if (routerState.location.startsWith("/settings/color-scheme")) {
             return;
           }
-          (inherited?.goRouter ?? router).push("/settings/color-scheme");
+          router.push("/settings/color-scheme");
         },
       ),
       TerminalAction(
@@ -222,14 +216,11 @@ List<TerminalAction> createDefaultActionsMap(Ref ref) => [
           shift: true,
         ),
         onInvoke: (context, ref) async {
-          final InheritedGoRouter? inherited =
-              context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
-          if ((inherited?.goRouter ?? router)
-              .location
-              .startsWith("/settings/keyboard-shortcuts")) {
+          final routerState = GoRouterState.of(context);
+          if (routerState.location.startsWith("/settings/keyboard-shortcuts")) {
             return;
           }
-          (inherited?.goRouter ?? router).push("/settings/keyboard-shortcuts");
+          router.push("/settings/keyboard-shortcuts");
         },
       ),
       TerminalAction(
