@@ -183,6 +183,8 @@ jobs:
       - name: Build Macos App
         run: |
           flutter config --enable-macos-desktop
+          flutter pub get
+          flutter pub global activate flutter_distributor
           flutter_distributor package --platform=macos --targets=dmg --flutter-build-args=no-tree-shake-icons --skip-clean
           mv dist/**/wives-*-macos.dmg build/Wives-macos-universal.dmg
 
