@@ -183,7 +183,7 @@ jobs:
       - name: Build Macos App
         run: |
           flutter config --enable-macos-desktop
-          flutter_distribution package --platform=macos --targets=dmg --flutter-build-args=no-tree-shake-icons --skip-clean
+          flutter_distributor package --platform=macos --targets=dmg --flutter-build-args=no-tree-shake-icons --skip-clean
           mv dist/**/wives-*-macos.dmg build/Wives-macos-universal.dmg
 
       - name: Debug With SSH When fails
