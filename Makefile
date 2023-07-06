@@ -8,21 +8,13 @@ init:
 innoinstall:
 						powershell curl -o build\installer.exe http://files.jrsoftware.org/is/6/innosetup-${INNO_VERSION}.exe
 						powershell build\installer.exe /verysilent /allusers /dir=build\iscc
-rpm:
-		mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-		mkdir -p rpmbuild/BUILD/wives
-		cp -r ${BUNDLE_DIR}/* rpmbuild/BUILD/wives
-		cp assets/logo.png rpmbuild/BUILD/wives.png
-		cp linux/wives.desktop rpmbuild/BUILD
-# $((0x0001|0x0002|0x0010)) = 19
-		QA_RPATHS=19 rpmbuild --define "_topdir `pwd`/rpmbuild" -bb rpmbuild/SPECS/wives.spec
-
+						
 tar:
 		mkdir -p $(TEMP_DIR)\
 		&& cp -r $(BUNDLE_DIR)/* $(TEMP_DIR)\
 		&& cp linux/wives.desktop $(TEMP_DIR)\
 		&& cp assets/logo.png $(TEMP_DIR)\
-		&& tar -cJf build/Wives-linux-x86_64.tar.xz -C $(TEMP_DIR) .\
+		&& tar -cJf build/wives-linux-${VERSION}-x86_64.tar.xz -C $(TEMP_DIR) .\
 		&& rm -rf $(TEMP_DIR)
 
 

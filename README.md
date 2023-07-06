@@ -41,6 +41,38 @@ But for real,
 Contributions are welcome. Please read [CONTRIBUTION.md](CONTRIBUTION.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 
+## Build from source
+
+**Prerequisites:**
+- Flutter SDK (>= 3.0.0)
+- git
+
+**Setup environment:**
+```bash
+$ git clone https://github.com/KRTirtho/wives.git && cd wives
+$ flutter pub get
+$ flutter pub global activate flutter_distributor
+```
+
+**Build the app:**
+```bash
+$ flutter_distributor package --platform=linux --targets=<deb/rpm/appimage>
+```
+> PS: --targets can be any one or multiple of `deb`, `rpm`, `appimage`
+>
+> .e.g `--targets=deb,rpm,appimage` or `--targets=deb,rpm` or `--targets=deb` etc..
+>
+> You can find the built packages in `dist/<Current Version>/` directory
+
+If you want to make a tarball, then run:
+```bash
+$ make tar VERSION=<Current Version>
+```
+> Build tarball will be in `build/wives-linux-<Current Version>-x86_64.tar.xz` directory
+>
+> Current Version can be find in the `pubspec.yaml` file
+
+
 ## Support Us
 
 <a href="https://www.buymeacoffee.com/krtirtho">
