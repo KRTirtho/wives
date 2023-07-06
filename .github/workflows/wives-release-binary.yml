@@ -183,7 +183,7 @@ jobs:
       - name: Build Macos App
         run: |
           flutter config --enable-macos-desktop
-          flutter build macos
+          flutter build macos --no-tree-shake-icons
           du -sh build/macos/Build/Products/Release/wives.app
 
       - name: Package Macos App
